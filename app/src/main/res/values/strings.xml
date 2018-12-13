@@ -3,4 +3,5 @@
 
     <!-- Fragment Tags -->
     <string name="fragtag_recipes">frag_recipes</string>
+    <string name="fragtag_steps">frag_steps</string>
 </resources>

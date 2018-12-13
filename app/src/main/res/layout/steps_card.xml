@@ -3,9 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
-        android:id="@+id/list_recipe_name_tv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"
-        tools:text="Title of my Recipe"/>
+        android:id="@+id/list_step_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Name of this step item"/>
 </android.support.constraint.ConstraintLayout>

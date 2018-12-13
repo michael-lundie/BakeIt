@@ -3,13 +3,11 @@ package io.lundie.michael.bakeit.ui.fragments;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,16 +22,14 @@ import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
+import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.ui.adapters.RecipesViewAdapter;
+import io.lundie.michael.bakeit.ui.adapters.StepsViewAdapter;
 import io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty;
 import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
-
-/**
- * A simple {@link Fragment} subclass.
- */
-public class RecipesFragment extends Fragment {
+public class StepsFragment extends Fragment {
 
     private static final String LOG_TAG = RecipesFragment.class.getName();
 
@@ -47,13 +43,16 @@ public class RecipesFragment extends Fragment {
 
     RecipesViewModel recipesViewModel;
 
-    RecipesViewAdapter mAdapter;
+    StepsViewAdapter mAdapter;
 
-    ArrayList<Recipe> mRecipeList;
+    Recipe mSelectedRecipe;
 
-    @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
+    ArrayList<RecipeStep> mRecipeSteps;
 
-    public RecipesFragment() { /* Required empty public constructor for fragment classes. */ }
+    @BindView(R.id.recipes_list_rv)
+    RecyclerViewWithSetEmpty mRecyclerView;
+
+    public StepsFragment() { /* Required empty public constructor for fragment classes. */ }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,28 +76,22 @@ public class RecipesFragment extends Fragment {
         if (savedInstanceState != null) {
             // Get parcelable movies list so we can populate the UI quickly while observers are
             // being refreshed
-            mRecipeList = savedInstanceState.getParcelableArrayList("mList");
-            if (mRecipeList == null ) {
-                mRecipeList = new ArrayList<>();
+            mRecipeSteps = savedInstanceState.getParcelable("mRecipeSteps");
+            if (mRecipeSteps == null ) {
+                mRecipeSteps = new ArrayList<RecipeStep>();
             }
         }
 
-        mAdapter = new RecipesViewAdapter(mRecipeList, new RecipesViewAdapter.OnItemClickListener() {
+
+        mAdapter = new StepsViewAdapter(mRecipeSteps, new StepsViewAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Recipe recipe) {
-                //TODO: Set up Recipe details fragment
-
-                recipesViewModel.selectRecipeItem(recipe);
-
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.primary_content_frame, new StepsFragment(), AppConstants.FRAGTAG_STEPS)
-                        .commit();
+            public void onItemClick(RecipeStep recipeStepItem) {
 
             }
-        });
+        }
+        );
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getListSpanCount()));
+        //mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getListSpanCount()));
         mRecyclerView.setAdapter(mAdapter);
 
 
@@ -117,6 +110,14 @@ public class RecipesFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (mRecipeSteps != null){
+            outState.putParcelableArrayList("mRecipeSteps", mRecipeSteps);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
     /**
      * A simple helper method to configure our view model.
      * Let's return two observables. One, which accesses our data. The other returns network status.
@@ -127,31 +128,28 @@ public class RecipesFragment extends Fragment {
         recipesViewModel = ViewModelProviders.of(getActivity(),
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
-        recipesViewModel.getRecipes().observe(this, new Observer<ArrayList<Recipe>>() {
+        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
             @Override
-            public void onChanged(@Nullable ArrayList<Recipe> recipes) {
+            public void onChanged(@Nullable Recipe selectedRecipe) {
 
 
-                if((recipes != null) && (!recipes.isEmpty())) {
+                if(selectedRecipe != null) {
 
-                    for (int i=0; i < recipes.size(); i++) {
-                        Log.i(LOG_TAG, "Recipe ID: " + recipes.get(i).getId());
+                    Log.v(LOG_TAG, "TEST: Selected Recipe is: " + selectedRecipe.getId());
+
+                    if(!selectedRecipe.getRecipeSteps().isEmpty()) {
+                        for (int i=0; i < selectedRecipe.getRecipeSteps().size(); i++) {
+                            Log.i(LOG_TAG, "Recipe Step: " + selectedRecipe.getRecipeSteps().get(i).getId());
+                        }
+
+                        mAdapter.setStepsList((ArrayList<RecipeStep>) selectedRecipe.getRecipeSteps());
                     }
 
-                    mAdapter.setRecipes(recipes);
+
 
                 }
-                Log.v(LOG_TAG, "on changed called" + mRecipeList);
             }
         });
-    }
-
-    private int getListSpanCount() {
-        if (getResources().getConfiguration().orientation == 2 || IS_TABLET) {
-            return 4;
-        } else {
-            return 3;
-        }
     }
 
     /**
