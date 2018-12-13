@@ -3,6 +3,7 @@ package io.lundie.michael.bakeit.ui.activities;
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,15 +14,21 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
+import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
+import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector {
 
     public static final String LOG_TAG = MainActivity.class.getName();
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
 
     @Inject
     RecipesViewModel recipesViewModel;
@@ -36,23 +43,19 @@ public class MainActivity extends AppCompatActivity {
         //Configure Dagger 2 injection
         this.configureDagger();
 
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.primary_content_frame,
+                        new RecipesFragment(), AppConstants.FRAGTAG_RECIPES)
+                .commit();
 
 
-        recipesViewModel.getRecipes().observe(this, new Observer<ArrayList<Recipe>>() {
-            @Override
-            public void onChanged(@Nullable ArrayList<Recipe> recipes) {
 
-                mRecipes = recipes;
-                if(mRecipes != null) {
-                    for (int i=0; i < mRecipes.size(); i++) {
-                        Log.i(LOG_TAG, "Recipe ID: " + mRecipes.get(i).getId());
-                    }
-                }
-                Log.v(LOG_TAG, "on changed called" + mRecipes);
-            }
-        });
+    }
 
-
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
     }
 
     private void configureDagger(){

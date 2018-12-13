@@ -6,6 +6,7 @@
     tools:context=".ui.fragments.RecipesFragment">
 
     <io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty
+        android:id="@+id/recipes_list_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </FrameLayout>

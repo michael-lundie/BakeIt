@@ -19,7 +19,7 @@ import io.lundie.michael.bakeit.utilities.AssetProvider;
  * Tutorial followed from:
  * https://blog.mindorks.com/the-new-dagger-2-android-injector-cbe7d55afa6a
  */
-@Module(includes = {ViewModelModule.class})
+@Module(includes = {ViewModelModule.class, AppConstantsModule.class})
 public class AppModule {
 
     private static final String LOG_TAG = AppModule.class.getSimpleName();

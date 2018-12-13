@@ -1,110 +1,155 @@
 package io.lundie.michael.bakeit.ui.fragments;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import dagger.android.support.AndroidSupportInjection;
 import io.lundie.michael.bakeit.R;
+import io.lundie.michael.bakeit.datamodel.models.Recipe;
+import io.lundie.michael.bakeit.ui.adapters.RecipesViewAdapter;
+import io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty;
+import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RecipesFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RecipesFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class RecipesFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String LOG_TAG = RecipesFragment.class.getName();
 
-    private OnFragmentInteractionListener mListener;
+    // Setting up some static variables
+    private static boolean IS_LANDSCAPE_TABLET;
+    private static boolean IS_TABLET;
 
-    public RecipesFragment() {
-        // Required empty public constructor
-    }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RecipesFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RecipesFragment newInstance(String param1, String param2) {
-        RecipesFragment fragment = new RecipesFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    @Inject
+    ViewModelProvider.Factory recipesViewModelFactory;
+
+    RecipesViewModel recipesViewModel;
+
+    RecipesViewAdapter mAdapter;
+
+    ArrayList<Recipe> mRecipeList;
+
+    @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
+
+    public RecipesFragment() { /* Required empty public constructor for fragment classes. */ }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // Check what kind of device we are viewing on
+        IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
+        IS_TABLET = getResources().getBoolean(R.bool.isTablet);
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recipes, container, false);
-    }
+        View listFragmentView =  inflater.inflate(R.layout.fragment_recipes, container, false);
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+        // Time to butter some toast... Bind view references with butterknife library.
+        ButterKnife.bind(this, listFragmentView);
+
+        if (savedInstanceState != null) {
+            // Get parcelable movies list so we can populate the UI quickly while observers are
+            // being refreshed
+            mRecipeList = savedInstanceState.getParcelableArrayList("mList");
+            if (mRecipeList == null ) {
+                mRecipeList = new ArrayList<>();
+            }
         }
+
+        mAdapter = new RecipesViewAdapter(mRecipeList, new RecipesViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Recipe recipe) {
+                //TODO: Set up Recipe details fragment
+            }
+        });
+
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getListSpanCount()));
+        mRecyclerView.setAdapter(mAdapter);
+
+
+        // Return the layout for this fragment
+        return listFragmentView;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+        this.configureDagger();
+
+        if(recipesViewModel == null) {
+            this.configureViewModel();
+        }
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * A simple helper method to configure our view model.
+     * Let's return two observables. One, which accesses our data. The other returns network status.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    private void configureViewModel() {
+
+        // Get our view model provider.
+        recipesViewModel = ViewModelProviders.of(getActivity(),
+                recipesViewModelFactory).get(RecipesViewModel.class);
+
+        recipesViewModel.getRecipes().observe(this, new Observer<ArrayList<Recipe>>() {
+            @Override
+            public void onChanged(@Nullable ArrayList<Recipe> recipes) {
+
+
+                if((recipes != null) && (!recipes.isEmpty())) {
+
+                    for (int i=0; i < recipes.size(); i++) {
+                        Log.i(LOG_TAG, "Recipe ID: " + recipes.get(i).getId());
+                    }
+
+                    mAdapter.setRecipes(recipes);
+
+                }
+                Log.v(LOG_TAG, "on changed called" + mRecipeList);
+            }
+        });
     }
+
+    private int getListSpanCount() {
+        if (getResources().getConfiguration().orientation == 2 || IS_TABLET) {
+            return 4;
+        } else {
+            return 3;
+        }
+    }
+
+    /**
+     * A simple helper method for setting up dagger with this fragment.
+     */
+    private void configureDagger(){
+        AndroidSupportInjection.inject(this);
+    }
+
 }
