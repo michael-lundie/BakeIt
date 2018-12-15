@@ -2,20 +2,16 @@ package io.lundie.michael.bakeit.datamodel.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
+
 public class RecipeStep implements Parcelable {
 
-    public final static Parcelable.Creator<RecipeStep> CREATOR = new Creator<RecipeStep>() {
-
-        @SuppressWarnings({ "unchecked" })
-        public RecipeStep createFromParcel(Parcel in) { return new RecipeStep(in); }
-
-        public RecipeStep[] newArray(int size) { return (new RecipeStep[size]); }
-
-    };
+    private static final String LOG_TAG = RecipeStep.class.getName();
 
     @SerializedName("id")
     @Expose
@@ -32,6 +28,17 @@ public class RecipeStep implements Parcelable {
     @SerializedName("thumbnailURL")
     @Expose
     private String thumbnailURL;
+
+    public final static Parcelable.Creator<RecipeStep> CREATOR = new Creator<RecipeStep>() {
+
+        @SuppressWarnings({ "unchecked" })
+        public RecipeStep createFromParcel(Parcel in) {
+            Log.i(LOG_TAG, "TEST: Creating RECIPE STEP <FROM> parcel.");
+            return new RecipeStep(in); }
+
+        public RecipeStep[] newArray(int size) { return (new RecipeStep[size]); }
+
+    };
 
     private RecipeStep(Parcel in) {
         this.id = in.readInt();
@@ -85,11 +92,12 @@ public class RecipeStep implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(id);
-        dest.writeValue(shortDescription);
-        dest.writeValue(description);
-        dest.writeValue(videoURL);
-        dest.writeValue(thumbnailURL);
+        Log.i(LOG_TAG, "TEST: Writing RECIPE STEP <TO> parcel.");
+        dest.writeInt(id);
+        dest.writeString(shortDescription);
+        dest.writeString(description);
+        dest.writeString(videoURL);
+        dest.writeString(thumbnailURL);
     }
 
     public int describeContents() {

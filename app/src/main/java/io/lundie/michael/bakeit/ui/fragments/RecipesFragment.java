@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,6 +25,7 @@ import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
+import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.ui.adapters.RecipesViewAdapter;
 import io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty;
 import io.lundie.michael.bakeit.utilities.AppConstants;
@@ -41,6 +43,8 @@ public class RecipesFragment extends Fragment {
     private static boolean IS_LANDSCAPE_TABLET;
     private static boolean IS_TABLET;
 
+    private static RecipesFragment recipesFragment;
+    private OnFragmentInteractionListener mListener;
 
     @Inject
     ViewModelProvider.Factory recipesViewModelFactory;
@@ -54,6 +58,7 @@ public class RecipesFragment extends Fragment {
     @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
 
     public RecipesFragment() { /* Required empty public constructor for fragment classes. */ }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,12 +79,12 @@ public class RecipesFragment extends Fragment {
         // Time to butter some toast... Bind view references with butterknife library.
         ButterKnife.bind(this, listFragmentView);
 
-        if (savedInstanceState != null) {
-            // Get parcelable movies list so we can populate the UI quickly while observers are
-            // being refreshed
-            mRecipeList = savedInstanceState.getParcelableArrayList("mList");
-            if (mRecipeList == null ) {
-                mRecipeList = new ArrayList<>();
+        if (mRecipeList == null || mRecipeList.isEmpty()){
+            if (savedInstanceState != null) {
+                mRecipeList = savedInstanceState.getParcelableArrayList("mRecipeList");
+                Log.i(LOG_TAG, "TEST: Retrieving parcelable data for recipe steps: " + mRecipeList);
+            } else {
+                mRecipeList = new ArrayList<Recipe>();
             }
         }
 
@@ -92,13 +97,14 @@ public class RecipesFragment extends Fragment {
 
                 getFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.primary_content_frame, new StepsFragment(), AppConstants.FRAGTAG_STEPS)
+                        .replace(R.id.primary_content_frame,
+                                new StepsFragment(), AppConstants.FRAGTAG_STEPS)
+                        .addToBackStack(null)
                         .commit();
-
             }
         });
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getListSpanCount()));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getListSpanCount()));
         mRecyclerView.setAdapter(mAdapter);
 
 
@@ -115,6 +121,14 @@ public class RecipesFragment extends Fragment {
         if(recipesViewModel == null) {
             this.configureViewModel();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if (mRecipeList != null){
+            outState.putParcelableArrayList("mRecipeList", mRecipeList);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     /**
@@ -136,6 +150,8 @@ public class RecipesFragment extends Fragment {
 
                     for (int i=0; i < recipes.size(); i++) {
                         Log.i(LOG_TAG, "Recipe ID: " + recipes.get(i).getId());
+
+                        Log.v(LOG_TAG, "Ingredients: " + recipes.get(i).getRecipeSteps().get(i).getDescription());
                     }
 
                     mAdapter.setRecipes(recipes);
@@ -153,6 +169,7 @@ public class RecipesFragment extends Fragment {
             return 3;
         }
     }
+
 
     /**
      * A simple helper method for setting up dagger with this fragment.

@@ -43,14 +43,24 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
         //Configure Dagger 2 injection
         this.configureDagger();
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.primary_content_frame,
-                        new RecipesFragment(), AppConstants.FRAGTAG_RECIPES)
-                .commit();
+        if(savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.primary_content_frame,
+                            new RecipesFragment(), AppConstants.FRAGTAG_RECIPES)
+                    .commit();
+        }
+    }
 
-
-
+    @Override
+    public void onBackPressed() {
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        Log.i(LOG_TAG, "Fragment Backstack count is: " + count);
+        if (count != 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

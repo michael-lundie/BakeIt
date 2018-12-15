@@ -2,6 +2,7 @@ package io.lundie.michael.bakeit.ui.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull RecipesViewAdapter.ViewHolder holder, int position) {
+        Log.i(LOG_TAG, "Recipe Step item count is: " +mRecipes.size());
         holder.bind(mRecipes.get(position), mListener);
     }
 

@@ -22,15 +22,19 @@ public class Recipe implements Parcelable {
     @SerializedName("id")
     @Expose
     private Integer id;
+
     @SerializedName("name")
     @Expose
     private String name;
+
     @SerializedName("ingredients")
     @Expose
-    private List<Ingredient> ingredients = null;
-    @SerializedName("recipeSteps")
+    private List<Ingredient> ingredients;
+
+    @SerializedName("steps")
     @Expose
-    private List<RecipeStep> recipeSteps = null;
+    private List<RecipeStep> recipeSteps;
+
     @SerializedName("servings")
     @Expose
     private Integer servings;

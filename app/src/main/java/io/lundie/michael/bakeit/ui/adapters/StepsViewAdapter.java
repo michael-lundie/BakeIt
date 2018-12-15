@@ -1,7 +1,9 @@
 package io.lundie.michael.bakeit.ui.adapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,16 +42,18 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.steps_card,
                 parent, false);
-        return new StepsViewAdapter.ViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull StepsViewAdapter.ViewHolder holder, int position) {
+        Log.i(LOG_TAG, "Binding to position: " + position);
         holder.bind(mRecipeSteps.get(position), mListener);
     }
 
     @Override
     public int getItemCount() {
+        Log.i(LOG_TAG, "Recipe Step item count is: " +mRecipeSteps.size());
         return mRecipeSteps.size();
     }
 
@@ -68,8 +72,7 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         final View mView;
 
         // Bind views using butterknife
-        @BindView(R.id.steps_list_rv)
-        TextView recipeStepShortDescription;
+        @BindView(R.id.list_step_name_tv) TextView recipeStepShortDescription;
 
         ViewHolder(View view) {
             super(view);
