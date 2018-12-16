@@ -3,14 +3,11 @@ package io.lundie.michael.bakeit.ui.fragments;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,9 +40,6 @@ public class RecipesFragment extends Fragment {
     private static boolean IS_LANDSCAPE_TABLET;
     private static boolean IS_TABLET;
 
-    private static RecipesFragment recipesFragment;
-    private OnFragmentInteractionListener mListener;
-
     @Inject
     ViewModelProvider.Factory recipesViewModelFactory;
 
@@ -58,7 +52,6 @@ public class RecipesFragment extends Fragment {
     @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
 
     public RecipesFragment() { /* Required empty public constructor for fragment classes. */ }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,16 +84,15 @@ public class RecipesFragment extends Fragment {
         mAdapter = new RecipesViewAdapter(mRecipeList, new RecipesViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Recipe recipe) {
-                //TODO: Set up Recipe details fragment
-
+                Log.v(LOG_TAG, "TEST: Selected recipe: " + recipe.getName());
+                // Select our recipe
                 recipesViewModel.selectRecipeItem(recipe);
+                // Pre-assign the first recipe step item
+                recipesViewModel.selectRecipeStep(recipe.getRecipeSteps().get(0));
+                // Request the steps fragment via the view model.
+                // MainActivity is observing and will manage fragments accordingly.
+                recipesViewModel.requestFragment(AppConstants.FRAGTAG_STEPS);
 
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.primary_content_frame,
-                                new StepsFragment(), AppConstants.FRAGTAG_STEPS)
-                        .addToBackStack(null)
-                        .commit();
             }
         });
 
@@ -124,6 +116,15 @@ public class RecipesFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        Log.v(LOG_TAG, "TEST: Recipes, ON RESUME called");
+        super.onResume();
+        if(recipesViewModel == null) {
+            this.configureViewModel();
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         if (mRecipeList != null){
             outState.putParcelableArrayList("mRecipeList", mRecipeList);
@@ -141,10 +142,11 @@ public class RecipesFragment extends Fragment {
         recipesViewModel = ViewModelProviders.of(getActivity(),
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
+        recipesViewModel.getRecipes().removeObservers(this);
+
         recipesViewModel.getRecipes().observe(this, new Observer<ArrayList<Recipe>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Recipe> recipes) {
-
 
                 if((recipes != null) && (!recipes.isEmpty())) {
 
@@ -154,7 +156,15 @@ public class RecipesFragment extends Fragment {
                         Log.v(LOG_TAG, "Ingredients: " + recipes.get(i).getRecipeSteps().get(i).getDescription());
                     }
 
-                    mAdapter.setRecipes(recipes);
+                    // It feels tempting to set our adapter directly from the variable returned by the
+                    // observer onChanged method. If we do this we will loose our fragment state,
+                    // since our viewmodel is not retained after replacing this fragment with
+                    // another. To handle this, we assign the returned variable to a local variable
+                    // holding which can hold reference to our recipes object. *phew!*
+                    // (Note: we could call configureViewModel() on resume, but we could potentially
+                    // run into some issues with this.
+                    mRecipeList = recipes;
+                    mAdapter.setRecipes(mRecipeList);
 
                 }
                 Log.v(LOG_TAG, "on changed called" + mRecipeList);
@@ -169,7 +179,6 @@ public class RecipesFragment extends Fragment {
             return 3;
         }
     }
-
 
     /**
      * A simple helper method for setting up dagger with this fragment.

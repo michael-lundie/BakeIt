@@ -119,6 +119,15 @@ public class StepsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        Log.v(LOG_TAG, "TEST: ON RESUME called");
+        super.onResume();
+
+            this.configureViewModel();
+
+    }
+
+    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         if (mRecipeSteps != null){
             Log.i(LOG_TAG, "TEST: Saving parcelable recipe steps.");
@@ -137,10 +146,11 @@ public class StepsFragment extends Fragment {
         recipesViewModel = ViewModelProviders.of(getActivity(),
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
+        recipesViewModel.getRecipes().removeObservers(this);
+
         recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
             @Override
             public void onChanged(@Nullable Recipe selectedRecipe) {
-
 
                 if(selectedRecipe != null) {
 
@@ -151,11 +161,14 @@ public class StepsFragment extends Fragment {
                             Log.i(LOG_TAG, "Recipe Step: " + selectedRecipe.getRecipeSteps().get(i).getId());
                         }
 
-                        mAdapter.setStepsList((ArrayList<RecipeStep>) selectedRecipe.getRecipeSteps());
+                        // Holding a local reference to recipe steps so that Android can handle
+                        // our fragment state without having to re-configure our viewmodel on
+                        // resume. (See further notes in RecipesFragment.java)
+                        //mRecipeSteps = (ArrayList<RecipeStep>) selectedRecipe.getRecipeSteps();
+                        mAdapter.setStepsList((ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps());
+                        //TODO: Which is better? Using notify data changed on local variable or just
+                        // reconfiguring the viewmodel every time?
                     }
-
-
-
                 }
             }
         });

@@ -3,6 +3,7 @@ package io.lundie.michael.bakeit.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.nfc.Tag;
 
 import java.util.ArrayList;
 
@@ -23,6 +24,7 @@ public class RecipesViewModel extends ViewModel {
     private static MutableLiveData<ArrayList<Recipe>> recipeListMutableLiveData;
     private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
     private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData;
+    private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
 
     public RecipesViewModel() { /* Required empty constructor. */ }
 
@@ -91,4 +93,12 @@ public class RecipesViewModel extends ViewModel {
      * @return a reference to the previously selected recipe item object if it exists.
      */
     public LiveData<RecipeStep> getSelectedRecipeStep() { return selectedRecipeStepLiveData; }
+
+    public void requestFragment(String fragmentTag) {
+        fragmentRequestedTag.setValue(fragmentTag);
+    }
+
+    public LiveData<String> fragmentRequestObserver() {
+        return fragmentRequestedTag;
+    }
 }

@@ -1,5 +1,6 @@
 package io.lundie.michael.bakeit.datamodel.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.List;
 import android.os.Parcel;

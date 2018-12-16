@@ -5,5 +5,6 @@ package io.lundie.michael.bakeit.ui.fragments;
  * allowing for communication between the root activity and fragments.
  * Concept adapted from https://stackoverflow.com/a/30763151
  */
-public interface OnFragmentInteractionListener {
+public interface OnFragmentNavigationListener {
+    void onFragmentNavigation(String destinationFragmentTag);
 }
