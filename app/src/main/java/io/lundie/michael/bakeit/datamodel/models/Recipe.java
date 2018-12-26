@@ -20,6 +20,8 @@ public class Recipe implements Parcelable {
 
     };
 
+    //TODO: Add some kind of manual count here 
+
     @SerializedName("id")
     @Expose
     private Integer id;

@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -26,9 +27,10 @@ import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.ui.adapters.StepsViewAdapter;
 import io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty;
+import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
-public class StepDetailsFragment extends Fragment {
+public class StepDetailsFragment extends Fragment implements View.OnClickListener {
 
     private static final String LOG_TAG = StepDetailsFragment.class.getName();
 
@@ -44,7 +46,11 @@ public class StepDetailsFragment extends Fragment {
 
     RecipeStep recipeStep;
 
+    int totalSteps;
+
     @BindView(R.id.detail_test_tv) TextView testTextTv;
+    @BindView(R.id.previous_step_btn) Button previousStepBtn;
+    @BindView(R.id.next_step_btn) Button nextStepBtn;
 
 
     public StepDetailsFragment() { /* Required empty public constructor for fragment classes. */ }
@@ -52,6 +58,32 @@ public class StepDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onClick(View view) {
+        //TODO: Add interaction listener, so any interaction with details set's it as default frag
+        int currentStepID = recipeStep.getId();
+
+
+        switch (view.getId()) {
+            case R.id.previous_step_btn:
+                if (currentStepID != 0) {
+
+
+
+
+                    recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
+                    recipesViewModel.selectRecipeStep(currentStepID -1);
+                }
+                break;
+            case R.id.next_step_btn:
+                if (currentStepID != recipesViewModel.getNumberOfSteps() -1) {
+                    recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
+                    recipesViewModel.selectRecipeStep(currentStepID +1);
+                }
+                break;
+        }
     }
 
     @Override
@@ -73,9 +105,30 @@ public class StepDetailsFragment extends Fragment {
             recipeStep = savedInstanceState.getParcelable("mRecipeStep");
         }
 
+        previousStepBtn.setOnClickListener(this);
+        nextStepBtn.setOnClickListener(this);
 
         // Return the layout for this fragment
         return listFragmentView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //TODO: Resolve any onPause stuff here.
+        Log.v(LOG_TAG, "TEST: ON PAUSE CALLED");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(recipesViewModel == null) {
+            this.configureViewModel();
+            getTotalSteps();
+        }
+        // If we paused this activity we can be pretty sure our observer was destroyed.
+        // We must restart our observer.
+        this.configureObservers();
     }
 
     @Override
@@ -86,6 +139,8 @@ public class StepDetailsFragment extends Fragment {
 
         if(recipesViewModel == null) {
             this.configureViewModel();
+            this.configureObservers();
+            getTotalSteps();
         }
     }
 
@@ -107,18 +162,33 @@ public class StepDetailsFragment extends Fragment {
         recipesViewModel = ViewModelProviders.of(getActivity(),
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
+    }
+
+    private void configureObservers() {
+        recipesViewModel.getSelectedRecipeStep().removeObservers(this);
+
         recipesViewModel.getSelectedRecipeStep().observe(this, new Observer<RecipeStep>() {
             @Override
             public void onChanged(@Nullable RecipeStep selectedRecipeStep) {
 
-
                 if(selectedRecipeStep != null) {
-
+                    Log.v(LOG_TAG, "Observer Changed: " +selectedRecipeStep.getDescription());
+                    recipeStep = selectedRecipeStep;
                     testTextTv.setText(selectedRecipeStep.getShortDescription());
-
                 }
             }
         });
+
+    }
+
+    private void getTotalSteps() {
+
+        Recipe currentRecipe = recipesViewModel.getSelectedRecipe().getValue();
+
+        if(currentRecipe != null) {
+            totalSteps = currentRecipe.getRecipeSteps().size();
+        }
+
     }
 
     /**

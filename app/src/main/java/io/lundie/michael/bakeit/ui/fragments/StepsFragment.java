@@ -88,14 +88,8 @@ public class StepsFragment extends Fragment {
         mAdapter = new StepsViewAdapter(mRecipeSteps, new StepsViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecipeStep recipeStepItem) {
-
+                recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
                 recipesViewModel.selectRecipeStep(recipeStepItem);
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.primary_content_frame,
-                                new StepDetailsFragment(), AppConstants.FRAGTAG_DETAILS)
-                        .addToBackStack(null)
-                        .commit();
             }
         });
 
@@ -175,10 +169,24 @@ public class StepsFragment extends Fragment {
     }
 
     /**
+     * A simple method for creating a fragment transaction and committing it.
+     * @param contentFrame The desired content frame in which to place the fragment
+     * @param fragment The desired fragment which we want to display.
+     * @param tag The fragment tag which should match which fragment we want to display.
+     */
+    private void replaceFragment(int contentFrame, Fragment fragment, String tag) {
+        getFragmentManager()
+                .beginTransaction()
+                .replace(contentFrame,
+                        fragment, tag)
+                .addToBackStack(tag)
+                .commit();
+    }
+
+    /**
      * A simple helper method for setting up dagger with this fragment.
      */
     private void configureDagger(){
         AndroidSupportInjection.inject(this);
     }
-
 }

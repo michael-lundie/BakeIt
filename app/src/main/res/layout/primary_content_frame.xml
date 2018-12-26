@@ -6,7 +6,7 @@
     android:fitsSystemWindows="true"
     android:fillViewport="true"
     android:id="@+id/primary_content_frame"
-    tools:context="io.lundie.michael.bakeit.ui.activities.MainActivity"
-    tools:showIn="@layout/activity_main"
+    tools:context="io.lundie.michael.bakeit.ui.activities.LauncherActivity"
+    tools:showIn="@layout/activity_launcher"
     android:orientation="vertical">
 </FrameLayout>

@@ -1,11 +1,14 @@
 <resources>
     <string name="app_name">Bake It</string>
+    <!-- Details Fragment -->
+    <string name="details_prev_btn">Previous Step</string>
+    <string name="details_next_btn">Next Step</string>
+
 
     <!-- Fragment Tags -->
     <string name="fragtag_recipes">frag_recipes</string>
     <string name="fragtag_steps">frag_steps</string>
     <string name="fragtag_details">frag_details</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

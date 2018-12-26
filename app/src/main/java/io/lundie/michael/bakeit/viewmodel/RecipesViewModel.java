@@ -3,7 +3,6 @@ package io.lundie.michael.bakeit.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.nfc.Tag;
 
 import java.util.ArrayList;
 
@@ -25,6 +24,7 @@ public class RecipesViewModel extends ViewModel {
     private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
     private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData;
     private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
+
 
     public RecipesViewModel() { /* Required empty constructor. */ }
 
@@ -87,6 +87,15 @@ public class RecipesViewModel extends ViewModel {
         }
 
         selectedRecipeStepLiveData.setValue(recipeStep);
+    }
+
+    public void selectRecipeStep(int recipeStepID) {
+        RecipeStep step = selectedRecipeMutableLiveData.getValue().getRecipeSteps().get(recipeStepID);
+        selectedRecipeStepLiveData.setValue(step);
+    }
+
+    public int getNumberOfSteps() {
+        return selectedRecipeMutableLiveData.getValue().getRecipeSteps().size();
     }
 
     /**
