@@ -16,7 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    
+    flavorDimensions "default"
+    productFlavors {
+        fake {
+            applicationIdSuffix ".fake"
+            versionNameSuffix "-fake"
+        }
+        production {
+            applicationIdSuffix ".production"
+            versionNameSuffix "-production"
+        }
+    }
 }
 
 dependencies {

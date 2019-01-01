@@ -9,7 +9,7 @@ import dagger.Component;
 import dagger.android.AndroidInjectionModule;
 import io.lundie.michael.bakeit.App;
 import io.lundie.michael.bakeit.injection.ActivityBuilder;
-import io.lundie.michael.bakeit.injection.module.AppModule;
+import injection.module.AppModule;
 
 /**
  * App component interface for dagger injections methods.

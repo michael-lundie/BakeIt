@@ -1,7 +1,6 @@
-package io.lundie.michael.bakeit.injection.module;
+package injection.module;
 
 import android.app.Application;
-import android.support.constraint.solver.Cache;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +10,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
+import io.lundie.michael.bakeit.datamodel.RecipeRepositoryMain;
 import io.lundie.michael.bakeit.utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 
@@ -44,8 +44,8 @@ public class AppModule {
     // Repo Injection
     @Provides
     @Singleton
-    RecipeRepository provideMovieRepository(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache) {
-        return new RecipeRepository(gson, assetProvider, lruCache);
+    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache) {
+        return new RecipeRepositoryMain(gson, assetProvider, lruCache);
     }
 
     // LRU Cache instance injection

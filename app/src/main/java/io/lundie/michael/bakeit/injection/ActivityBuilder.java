@@ -2,7 +2,7 @@ package io.lundie.michael.bakeit.injection;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
-import io.lundie.michael.bakeit.injection.module.FragmentModule;
+import injection.module.FragmentModule;
 import io.lundie.michael.bakeit.ui.activities.LauncherActivity;
 import io.lundie.michael.bakeit.ui.activities.RecipeActivity;
 

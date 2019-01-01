@@ -1,4 +1,4 @@
-package io.lundie.michael.bakeit.injection.module;
+package injection.module;
 
 import android.app.Application;
 
