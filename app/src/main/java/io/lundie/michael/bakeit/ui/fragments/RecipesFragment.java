@@ -150,7 +150,7 @@ public class RecipesFragment extends Fragment {
                 if((recipes != null) && (!recipes.isEmpty())) {
 
                     for (int i=0; i < recipes.size(); i++) {
-                        Log.i(LOG_TAG, "Recipe ID: " + recipes.get(i).getId());
+                        Log.i(LOG_TAG, "Recipe steps Number: " + recipes.get(i).getId());
 
                         Log.v(LOG_TAG, "Ingredients: " + recipes.get(i).getRecipeSteps().get(i).getDescription());
                     }

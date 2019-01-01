@@ -63,24 +63,20 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View view) {
         //TODO: Add interaction listener, so any interaction with details set's it as default frag
-        int currentStepID = recipeStep.getId();
+        int currentStepNumber = recipeStep.getStepNumber();
 
 
         switch (view.getId()) {
             case R.id.previous_step_btn:
-                if (currentStepID != 0) {
-
-
-
-
+                if (currentStepNumber != 0) {
                     recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
-                    recipesViewModel.selectRecipeStep(currentStepID -1);
+                    recipesViewModel.selectRecipeStep(currentStepNumber -1);
                 }
                 break;
             case R.id.next_step_btn:
-                if (currentStepID != recipesViewModel.getNumberOfSteps() -1) {
+                if (currentStepNumber != recipesViewModel.getNumberOfSteps() -1) {
                     recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
-                    recipesViewModel.selectRecipeStep(currentStepID +1);
+                    recipesViewModel.selectRecipeStep(currentStepNumber +1);
                 }
                 break;
         }

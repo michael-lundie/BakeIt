@@ -5,13 +5,18 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
+import io.lundie.michael.bakeit.datamodel.deserializers.RecipeStepListDeserializer;
 import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
 
+@JsonAdapter(RecipeStepListDeserializer.class)
 public class RecipeStep implements Parcelable {
 
     private static final String LOG_TAG = RecipeStep.class.getName();
+
+    private Integer stepNumber;
 
     @SerializedName("id")
     @Expose
@@ -48,7 +53,23 @@ public class RecipeStep implements Parcelable {
         this.thumbnailURL = in.readString();
     }
 
-    public RecipeStep() {
+    public RecipeStep(Integer stepNumber,
+                      Integer id,
+                      String shortDescription,
+                      String description,
+                      String videoURL,
+                      String thumbnailURL) {
+
+        this.stepNumber = stepNumber;
+        this.id = id;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.videoURL = videoURL;
+        this.thumbnailURL = thumbnailURL;
+    }
+
+    public Integer getStepNumber() {
+        return stepNumber;
     }
 
     public Integer getId() {

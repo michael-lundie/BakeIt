@@ -152,7 +152,7 @@ public class StepsFragment extends Fragment {
 
                     if(!selectedRecipe.getRecipeSteps().isEmpty()) {
                         for (int i=0; i < selectedRecipe.getRecipeSteps().size(); i++) {
-                            Log.i(LOG_TAG, "Recipe Step: " + selectedRecipe.getRecipeSteps().get(i).getId());
+                            Log.i(LOG_TAG, "Recipe Step No: " + selectedRecipe.getRecipeSteps().get(i).getStepNumber());
                         }
 
                         // Holding a local reference to recipe steps so that Android can handle
