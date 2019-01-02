@@ -14,5 +14,19 @@
     <string name="fragtag_steps">frag_steps</string>
     <string name="fragtag_details">frag_details</string>
 
+    <!-- MEASUREMENT ACRONYMS -->
+    <string name="acronym_grams">G</string>
+    <string name="text_grams">grams of</string>
+    <string name="acronym_unit">UNIT</string>
+    <string name="acronym_tea_spoon">TSP</string>
+    <string name="text_tea_spoon">tea spoons of</string>
+    <string name="acronym_table_spoon">TBLSP</string>
+    <string name="text_table_spoon">table spoons of</string>
+    <string name="acronym_kilo">K</string>
+    <string name="text_kilo">kilograms of</string>
+    <string name="acronym_cup">CUP</string>
+    <string name="text_cup">cups of</string>
+    <string name="acronym_ounce">OZ</string>
+    <string name="text_ounce">ounces of</string>
 
 </resources>

@@ -13,8 +13,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.StringJoiner;
 
 import javax.inject.Inject;
 
@@ -22,10 +25,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.android.support.AndroidSupportInjection;
 import io.lundie.michael.bakeit.R;
+import io.lundie.michael.bakeit.datamodel.models.Ingredient;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.ui.adapters.RecipesViewAdapter;
 import io.lundie.michael.bakeit.ui.adapters.StepsViewAdapter;
+import io.lundie.michael.bakeit.ui.fragments.utils.DataUtils;
 import io.lundie.michael.bakeit.ui.views.RecyclerViewWithSetEmpty;
 import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
@@ -39,8 +44,9 @@ public class StepsFragment extends Fragment {
     private static boolean IS_TABLET;
 
 
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
+
+    @Inject DataUtils dataUtils;
 
     RecipesViewModel recipesViewModel;
 
@@ -52,6 +58,8 @@ public class StepsFragment extends Fragment {
 
     @BindView(R.id.steps_list_rv)
     RecyclerViewWithSetEmpty mRecyclerView;
+    @BindView(R.id.steps_list_ingredients_tv)
+    TextView mStepsListTv;
 
     public StepsFragment() { /* Required empty public constructor for fragment classes. */ }
 
@@ -155,6 +163,9 @@ public class StepsFragment extends Fragment {
                             Log.i(LOG_TAG, "Recipe Step No: " + selectedRecipe.getRecipeSteps().get(i).getStepNumber());
                         }
 
+                        mStepsListTv.setText(dataUtils.generateIngredientsList
+                                ((ArrayList<Ingredient>) selectedRecipe.getIngredients()));
+
                         // Holding a local reference to recipe steps so that Android can handle
                         // our fragment state without having to re-configure our viewmodel on
                         // resume. (See further notes in RecipesFragment.java)
@@ -167,6 +178,7 @@ public class StepsFragment extends Fragment {
             }
         });
     }
+
 
     /**
      * A simple method for creating a fragment transaction and committing it.
