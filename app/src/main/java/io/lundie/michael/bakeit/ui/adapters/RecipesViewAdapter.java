@@ -73,6 +73,7 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
 
         // Bind views using butterknife
         @BindView(R.id.list_recipe_name_tv) TextView recipeNameTv;
+        @BindView(R.id.list_recipe_servings) TextView servingsTv;
 
         ViewHolder(View view) {
             super(view);
@@ -81,14 +82,18 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
         }
 
         void bind(final Recipe recipe, final OnItemClickListener listener) {
+            String servings = itemView.getResources().getString(R.string.recipes_text_serving_size)
+                    + recipe.getServings();
+
             recipeNameTv.setText(recipe.getName());
+            servingsTv.setText(servings);
+
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     listener.onItemClick(recipe);
                 }
             });
-
         }
     }
 }

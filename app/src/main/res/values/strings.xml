@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Bake It</string>
+    <!-- UI -->
+    <string name="CD_image_recipe_thumb">Image of recipe.</string>
+    <string name="recipes_text_serving_size">Servings:</string>
+
     <!-- Details Fragment -->
     <string name="details_prev_btn">Previous Step</string>
     <string name="details_next_btn">Next Step</string>
