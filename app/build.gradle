@@ -1,11 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     defaultConfig {
         applicationId "io.lundie.michael.bakeit"
-        minSdkVersion 14
-        targetSdkVersion 27
+        minSdkVersion 16
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,10 +35,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
 
     //BUTTERKNIFE
     implementation 'com.jakewharton:butterknife:8.8.1'
@@ -48,15 +52,19 @@ dependencies {
     implementation "android.arch.lifecycle:viewmodel:1.1.1"
 
     // Dagger 2
-    implementation 'com.google.dagger:dagger-android:2.14.1'
-    implementation 'com.google.dagger:dagger-android-support:2.14.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    annotationProcessor 'com.google.dagger:dagger-android-processor:2.14.1'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.14.1'
+    implementation 'com.google.dagger:dagger-android:2.16'
+    implementation 'com.google.dagger:dagger-android-support:2.16'
+    implementation 'com.android.support:support-v4:28.0.0'
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.16'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
+
+    // EXO Player and Media support
+    implementation 'com.android.support:support-media-compat:28.0.0'
+    implementation 'com.google.android.exoplayer:exoplayer:2.9.3'
 
     // Testing
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test:rules:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
 }

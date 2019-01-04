@@ -112,14 +112,18 @@ public class RecipeActivity extends AppCompatActivity
         recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String fragmentTag) {
-
-                if (fragmentTag != null) {
+                if(fragmentTag != null &&
+                        !fragmentTag.equals(recipesViewModel.getPreviousFragmentRequestTag())) {
                     setupFragmentDisplay(fragmentTag);
                 } else {
                     setupFragmentDisplay(currentFragment);
                 }
             }
         });
+
+    }
+
+    private void updateFragmentDisplay(String fragmentTag) {
 
     }
 
@@ -139,9 +143,15 @@ public class RecipeActivity extends AppCompatActivity
         }
         else if (fragmentTag.equals(AppConstants.FRAGTAG_DETAILS))
         {
-
             if(detailsFragment == null) {
-                detailsFragment = new StepDetailsFragment();
+                Fragment recoveredDetailsFragment =
+                        getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+
+                if(recoveredDetailsFragment != null) {
+                    detailsFragment = (StepDetailsFragment) recoveredDetailsFragment;
+                } else {
+                    detailsFragment = new StepDetailsFragment();
+                }
             }
 
             if(!getResources().getBoolean(R.bool.isLandscapeTablet)) {

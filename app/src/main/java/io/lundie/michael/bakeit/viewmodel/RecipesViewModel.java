@@ -24,6 +24,7 @@ public class RecipesViewModel extends ViewModel {
     private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
     private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData;
     private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
+    private static MutableLiveData<String> previousFragmentRequestTag = new MutableLiveData<>();
 
 
     public RecipesViewModel() { /* Required empty constructor. */ }
@@ -104,10 +105,15 @@ public class RecipesViewModel extends ViewModel {
     public LiveData<RecipeStep> getSelectedRecipeStep() { return selectedRecipeStepLiveData; }
 
     public void requestFragment(String fragmentTag) {
+        previousFragmentRequestTag.setValue(fragmentRequestedTag.getValue());
         fragmentRequestedTag.setValue(fragmentTag);
     }
 
     public LiveData<String> fragmentRequestObserver() {
         return fragmentRequestedTag;
+    }
+
+    public String getPreviousFragmentRequestTag() {
+        return previousFragmentRequestTag.getValue();
     }
 }

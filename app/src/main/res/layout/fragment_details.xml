@@ -7,10 +7,17 @@
     android:background="@android:color/holo_blue_bright"
     tools:context=".ui.fragments.StepsFragment">
 
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/video_pv"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+    </com.google.android.exoplayer2.ui.PlayerView>
+
     <TextView
         android:id="@+id/detail_test_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
 
     <Button
         android:id="@+id/previous_step_btn"
@@ -34,8 +41,6 @@
         android:id="@+id/next_step_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline" />

@@ -21,7 +21,10 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
  * Tutorial followed from:
  * https://blog.mindorks.com/the-new-dagger-2-android-injector-cbe7d55afa6a
  */
-@Module(includes = {ViewModelModule.class, AppConstantsModule.class, DataUtilsModule.class})
+@Module(includes = {ViewModelModule.class,
+                    AppConstantsModule.class,
+                    DataUtilsModule.class,
+                    ExoPlayerModule.class})
 public class AppModule {
 
     private static final String LOG_TAG = AppModule.class.getSimpleName();
