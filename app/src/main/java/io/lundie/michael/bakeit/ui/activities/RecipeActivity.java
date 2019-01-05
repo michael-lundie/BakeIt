@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -42,11 +43,15 @@ public class RecipeActivity extends AppCompatActivity
 
     @Inject AppConstants appConstants;
 
+    static boolean IS_LANDSCAPE;
+    static boolean IS_TABLET;
+
+    static int PRIMARY_FRAME = R.id.primary_content_frame;
+    static int SECONDARY_FRAME = R.id.secondary_content_frame;
+
     RecipesViewModel recipesViewModel;
 
-    String previousFragment;
-    String currentFragment;
-
+    // Holding local references to our variables so we can access them easily.
     StepsFragment stepsFragment;
     StepDetailsFragment detailsFragment;
 
@@ -54,25 +59,75 @@ public class RecipeActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(LOG_TAG, "Vids: On CREATE called in holding ACTIVITY");
         setContentView(R.layout.activity_recipe);
-
+        IS_LANDSCAPE = getResources().getBoolean(R.bool.isLandscape);
+        IS_TABLET = getResources().getBoolean(R.bool.isTablet);
         //Configure Dagger 2 injection
+
         this.configureDagger();
 
-        this.configureViewModel();
+        if (!IS_LANDSCAPE && !IS_TABLET) {
+            // We don't need any view model observers if we are in tablet landscape mode, since the
+            // recipe details fragment can update itself.
+            this.configureViewModel();
+        }
+
 
         if(savedInstanceState == null) {
+
+            stepsFragment = new StepsFragment();
+
+            Log.v(LOG_TAG, "Vids: Instance state is null");
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.primary_content_frame,
-                            new RecipesFragment(), AppConstants.FRAGTAG_RECIPES)
+                            stepsFragment, AppConstants.FRAGTAG_STEPS)
                     .commit();
+
+            if(IS_TABLET && IS_LANDSCAPE) {
+                detailsFragment = new StepDetailsFragment();
+                replaceFragment(R.id.secondary_content_frame,
+                        detailsFragment,
+                        AppConstants.FRAGTAG_DETAILS);
+            }
+        } else {
+            Log.v(LOG_TAG, "Vids: Will Resume from saved instance state.");
+            detailsFragment = (StepDetailsFragment) getSupportFragmentManager()
+                    .getFragment(savedInstanceState, AppConstants.FRAGTAG_DETAILS);
+
+            stepsFragment = (StepsFragment) getSupportFragmentManager()
+                    .getFragment(savedInstanceState, AppConstants.FRAGTAG_STEPS);
+
+            if (IS_TABLET && IS_LANDSCAPE) {
+
+                replaceFragment(R.id.primary_content_frame,
+                        recreateFragment(stepsFragment),
+                        AppConstants.FRAGTAG_STEPS);
+
+                replaceFragment(R.id.secondary_content_frame,
+                        recreateFragment(detailsFragment),
+                        AppConstants.FRAGTAG_DETAILS);
+            } else {
+
+                Log.i(LOG_TAG, "Vids: Replace primary content frame");
+                replaceFragment(R.id.primary_content_frame,
+                        recreateFragment(detailsFragment),
+                        AppConstants.FRAGTAG_DETAILS);
+            }
         }
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        getSupportFragmentManager().putFragment(outState, AppConstants.FRAGTAG_DETAILS, detailsFragment);
+        getSupportFragmentManager().putFragment(outState,  AppConstants.FRAGTAG_STEPS, stepsFragment);
+    }
+
+    @Override
     public void onBackPressed() {
-        if (getResources().getBoolean(R.bool.isLandscapeTablet) ||
+        if ((IS_LANDSCAPE && IS_TABLET) ||
                 stepsFragment != null && stepsFragment.isVisible()) {
 
             recipesViewModel.requestFragment(AppConstants.FRAGTAG_RECIPES);
@@ -82,7 +137,7 @@ public class RecipeActivity extends AppCompatActivity
             startActivity(launcherIntent);
         } else {
             recipesViewModel.requestFragment(AppConstants.FRAGTAG_STEPS);
-            setupFragmentDisplay(AppConstants.FRAGTAG_STEPS);
+            updateFragmentDisplay(AppConstants.FRAGTAG_STEPS);
         }
     }
 
@@ -101,86 +156,78 @@ public class RecipeActivity extends AppCompatActivity
         recipesViewModel = ViewModelProviders.of(this,
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
-        setupFragmentDisplay(AppConstants.FRAGTAG_STEPS);
-
-        if(getResources().getBoolean(R.bool.isLandscapeTablet)) {
-            /*TODO; Set up details to automatically load the first step on initialisation unless
-             otherwise requested by user. */
-            setupFragmentDisplay(AppConstants.FRAGTAG_DETAILS);
-        }
-
-        recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
+        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
             @Override
-            public void onChanged(@Nullable String fragmentTag) {
-                if(fragmentTag != null &&
-                        !fragmentTag.equals(recipesViewModel.getPreviousFragmentRequestTag())) {
-                    setupFragmentDisplay(fragmentTag);
-                } else {
-                    setupFragmentDisplay(currentFragment);
+            public void onChanged(@Nullable Recipe recipe) {
+                if (detailsFragment == null) {
+                    detailsFragment = new StepDetailsFragment();
                 }
+                replaceFragment(PRIMARY_FRAME, detailsFragment, AppConstants.FRAGTAG_DETAILS);
             }
         });
-
     }
 
     private void updateFragmentDisplay(String fragmentTag) {
 
-    }
+        if(fragmentTag.equals(AppConstants.FRAGTAG_STEPS)) {
 
-    private void setupFragmentDisplay(String fragmentTag) {
-        Log.i(LOG_TAG, "TEST: Fragment Tag is: " + fragmentTag);
-
-        if(fragmentTag.equals(AppConstants.FRAGTAG_STEPS))
-        {
-            previousFragment = AppConstants.FRAGTAG_RECIPES;
-
-            if(stepsFragment == null) {
+            if (stepsFragment == null) {
                 stepsFragment = new StepsFragment();
             }
 
-            replaceFragment(R.id.primary_content_frame, stepsFragment,
-                    AppConstants.FRAGTAG_STEPS);
-        }
-        else if (fragmentTag.equals(AppConstants.FRAGTAG_DETAILS))
-        {
+            replaceFragment(R.id.primary_content_frame, stepsFragment, AppConstants.FRAGTAG_STEPS);
+
+
+        } else
+        if (fragmentTag.equals(AppConstants.FRAGTAG_DETAILS)) {
             if(detailsFragment == null) {
-                Fragment recoveredDetailsFragment =
-                        getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
-
-                if(recoveredDetailsFragment != null) {
-                    detailsFragment = (StepDetailsFragment) recoveredDetailsFragment;
-                } else {
-                    detailsFragment = new StepDetailsFragment();
-                }
+                detailsFragment = new StepDetailsFragment();
             }
 
-            if(!getResources().getBoolean(R.bool.isLandscapeTablet)) {
+            int contentFrame;
 
-                replaceFragment(R.id.primary_content_frame, detailsFragment,
-                        AppConstants.FRAGTAG_DETAILS);
-
+            if(IS_LANDSCAPE && IS_TABLET) {
+                contentFrame = R.id.secondary_content_frame;
             } else {
-
-                previousFragment = AppConstants.FRAGTAG_STEPS;
-
-                replaceFragment(R.id.secondary_content_frame, detailsFragment,
-                        AppConstants.FRAGTAG_DETAILS);
+                contentFrame = R.id.primary_content_frame;
             }
+            replaceFragment(contentFrame, detailsFragment, AppConstants.FRAGTAG_DETAILS);
         }
     }
 
     /**
      * A simple method for creating a fragment transaction and committing it.
-     * @param contentFrame The desired content frame in which to place the fragment
+     * @param contentFrameID The desired content frame in which to place the fragment
      * @param fragment The desired fragment which we want to display.
      * @param tag The fragment tag which should match which fragment we want to display.
      */
-    private void replaceFragment(int contentFrame, Fragment fragment, String tag) {
+    private void replaceFragment(int contentFrameID, Fragment fragment, String tag) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStackImmediate();
+        }
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(contentFrame,
+                .replace(contentFrameID,
                         fragment, tag)
-                .addToBackStack(tag)
+                //.addToBackStack(tag)
                 .commit();
+    }
+
+    // Note: There must be a better way to do this - it's really slow.
+    // (Or I must optimise the rate at which the fragment can be recreated.
+    private Fragment recreateFragment(Fragment fragment)
+    {
+        try {
+            Fragment.SavedState savedState = getSupportFragmentManager().saveFragmentInstanceState(fragment);
+
+            Fragment newInstance = fragment.getClass().newInstance();
+            newInstance.setInitialSavedState(savedState);
+
+            return newInstance;
+        }
+        catch (Exception e) // InstantiationException, IllegalAccessException
+        {
+            throw new RuntimeException("Cannot reinstantiate fragment " + fragment.getClass().getName(), e);
+        }
     }
 }

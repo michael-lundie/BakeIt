@@ -143,12 +143,10 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onPause() {
         super.onPause();
-        if (Util.SDK_INT <= 23) {
-            if (playerView != null) {
-                playerView.onPause();
-            }
-            releasePlayer();
+        if (playerView != null) {
+            playerView.onPause();
         }
+        releasePlayer();
         //TODO: Resolve any onPause stuff here.
         Log.v(LOG_TAG, "TEST: ON PAUSE CALLED");
     }
@@ -168,12 +166,10 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onStop() {
         super.onStop();
-        if (Util.SDK_INT > 23) {
-            if (playerView != null) {
-                playerView.onPause();
-            }
-            releasePlayer();
+        if (playerView != null) {
+            playerView.onPause();
         }
+        releasePlayer();
     }
 
     @Override
@@ -228,11 +224,12 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                                 playerView.setVisibility(View.VISIBLE);
                                 initializePlayer();
                                 prepareMediaSource(mediaUri);
-                            } else if (Util.SDK_INT <= 23 || mExoPlayer == null){
+                            } else {
                                 initializePlayer();
                                 if (playerView != null) {
                                     playerView.onResume();
                                 }
+
                             }
                             //TODO: Check network connectivity
                     } else {
@@ -331,9 +328,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
      * Release ExoPlayer.
      */
     private void releasePlayer() {
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if(mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
 
     /**
