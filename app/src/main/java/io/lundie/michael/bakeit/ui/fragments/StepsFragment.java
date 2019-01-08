@@ -96,6 +96,7 @@ public class StepsFragment extends Fragment {
         mAdapter = new StepsViewAdapter(mRecipeSteps, new StepsViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecipeStep recipeStepItem) {
+                Log.i(LOG_TAG, "TEST: View Adapter click received.");
                 recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
                 recipesViewModel.selectRecipeStep(recipeStepItem);
             }

@@ -3,8 +3,10 @@ package io.lundie.michael.bakeit.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -22,7 +24,8 @@ public class RecipesViewModel extends ViewModel {
     // MutableLiveData variables for handling data fetched via repo
     private static MutableLiveData<ArrayList<Recipe>> recipeListMutableLiveData;
     private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
-    private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData;
+    private static MutableLiveData<Long> recipeVideoPlaybackPosition  = new MutableLiveData<>();;
+    private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData = new MutableLiveData<>();
     private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
     private static MutableLiveData<String> previousFragmentRequestTag = new MutableLiveData<>();
 
@@ -82,16 +85,11 @@ public class RecipesViewModel extends ViewModel {
      * @param recipeStep the specific recipe STEP object to be loaded into a LiveData object
      */
     public void selectRecipeStep(RecipeStep recipeStep) {
-
-        if(selectedRecipeStepLiveData == null) {
-            selectedRecipeStepLiveData = new MutableLiveData<>();
-        }
-
         selectedRecipeStepLiveData.setValue(recipeStep);
     }
 
     public void selectRecipeStep(int recipeStepID) {
-        RecipeStep step = selectedRecipeMutableLiveData.getValue().getRecipeSteps().get(recipeStepID);
+       RecipeStep step = selectedRecipeMutableLiveData.getValue().getRecipeSteps().get(recipeStepID);
         selectedRecipeStepLiveData.setValue(step);
     }
 
@@ -99,6 +97,25 @@ public class RecipesViewModel extends ViewModel {
         return selectedRecipeMutableLiveData.getValue().getRecipeSteps().size();
     }
 
+    public void resetRecipeSteps() {
+        selectedRecipeStepLiveData.setValue(null);
+    }
+
+    public void setRecipeVideoPlaybackPosition(long playbackPosition) {
+        Log.i(LOG_TAG, "TEST: position before: " + playbackPosition);
+        recipeVideoPlaybackPosition.setValue(playbackPosition);
+        Log.i(LOG_TAG, "TEST: position after: " + recipeVideoPlaybackPosition.getValue());
+    }
+
+    public long getRecipeVideoPlaybackPosition() {
+        Long playbackPosition = 0L;
+        if(recipeVideoPlaybackPosition != null) {
+            playbackPosition = recipeVideoPlaybackPosition.getValue();
+            Log.i(LOG_TAG, "Test - view model >>> pp: " + playbackPosition);
+            recipeVideoPlaybackPosition.setValue(null);
+        }
+        return playbackPosition==null?0:playbackPosition;
+    }
     /**
      * @return a reference to the previously selected recipe item object if it exists.
      */
@@ -107,6 +124,10 @@ public class RecipesViewModel extends ViewModel {
     public void requestFragment(String fragmentTag) {
         previousFragmentRequestTag.setValue(fragmentRequestedTag.getValue());
         fragmentRequestedTag.setValue(fragmentTag);
+    }
+
+    public String getRequestedFragment() {
+        return fragmentRequestedTag.getValue();
     }
 
     public LiveData<String> fragmentRequestObserver() {

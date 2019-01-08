@@ -38,6 +38,8 @@ public class LauncherActivity extends AppCompatActivity
 
     @Inject AppConstants appConstants;
 
+    static boolean IS_LANDSCAPE_TABLET;
+
     RecipesViewModel recipesViewModel;
 
     RecipesFragment recipesFragment;
@@ -46,6 +48,8 @@ public class LauncherActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
+
+        IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
 
         //Configure Dagger 2 injection
         this.configureDagger();
@@ -97,6 +101,9 @@ public class LauncherActivity extends AppCompatActivity
 
                 if (fragmentTag != null && fragmentTag.equals(AppConstants.FRAGTAG_STEPS)) {
                     Intent recipeActivityIntent = new Intent(getApplication(), RecipeActivity.class);
+                    if(IS_LANDSCAPE_TABLET) {
+                        recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
+                    }
                     startActivity(recipeActivityIntent);
                 }
             }

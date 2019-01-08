@@ -11,12 +11,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.animation.LayoutAnimationController;
 
 import java.util.ArrayList;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
@@ -33,7 +35,7 @@ import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 public class RecipeActivity extends AppCompatActivity
         implements HasSupportFragmentInjector {
 
-    public static final String LOG_TAG = LauncherActivity.class.getName();
+    public static final String LOG_TAG = RecipeActivity.class.getName();
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
@@ -45,9 +47,12 @@ public class RecipeActivity extends AppCompatActivity
 
     static boolean IS_LANDSCAPE;
     static boolean IS_TABLET;
+    static boolean IS_LANDSCAPE_TABLET;
 
     static int PRIMARY_FRAME = R.id.primary_content_frame;
     static int SECONDARY_FRAME = R.id.secondary_content_frame;
+
+    String requestedFragment;
 
     RecipesViewModel recipesViewModel;
 
@@ -63,57 +68,57 @@ public class RecipeActivity extends AppCompatActivity
         setContentView(R.layout.activity_recipe);
         IS_LANDSCAPE = getResources().getBoolean(R.bool.isLandscape);
         IS_TABLET = getResources().getBoolean(R.bool.isTablet);
+        IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
+
         //Configure Dagger 2 injection
-
         this.configureDagger();
-
-        if (!IS_LANDSCAPE && !IS_TABLET) {
-            // We don't need any view model observers if we are in tablet landscape mode, since the
-            // recipe details fragment can update itself.
-            this.configureViewModel();
-        }
-
+        this.configureViewModel();
 
         if(savedInstanceState == null) {
 
-            stepsFragment = new StepsFragment();
+            addFragment(PRIMARY_FRAME, setUpStepsFragment(null), AppConstants.FRAGTAG_STEPS);
 
-            Log.v(LOG_TAG, "Vids: Instance state is null");
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.primary_content_frame,
-                            stepsFragment, AppConstants.FRAGTAG_STEPS)
-                    .commit();
-
-            if(IS_TABLET && IS_LANDSCAPE) {
-                detailsFragment = new StepDetailsFragment();
-                replaceFragment(R.id.secondary_content_frame,
-                        detailsFragment,
-                        AppConstants.FRAGTAG_DETAILS);
+            if (IS_LANDSCAPE_TABLET) {
+                addFragment(SECONDARY_FRAME, setUpDetailsFragment(null), AppConstants.FRAGTAG_DETAILS);
             }
+
         } else {
-            Log.v(LOG_TAG, "Vids: Will Resume from saved instance state.");
-            detailsFragment = (StepDetailsFragment) getSupportFragmentManager()
-                    .getFragment(savedInstanceState, AppConstants.FRAGTAG_DETAILS);
 
-            stepsFragment = (StepsFragment) getSupportFragmentManager()
-                    .getFragment(savedInstanceState, AppConstants.FRAGTAG_STEPS);
+            if (!IS_LANDSCAPE_TABLET) {
+                if (recipesViewModel != null && recipesViewModel.getRequestedFragment()
+                        .equals(AppConstants.FRAGTAG_STEPS)) {
+                    Log.i(LOG_TAG, "TEST: IS PORTRAIT: last fragment = STEPS" +
+                    recipesViewModel.getRequestedFragment());
 
-            if (IS_TABLET && IS_LANDSCAPE) {
+                } else {
+                    Log.i(LOG_TAG, "TEST: Switching to portrait, attempting to recreate" +
+                            "DETAILS fragment in PRIMARY frame");
+                    removeFragment(SECONDARY_FRAME,
+                                    getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS));
 
-                replaceFragment(R.id.primary_content_frame,
-                        recreateFragment(stepsFragment),
-                        AppConstants.FRAGTAG_STEPS);
 
-                replaceFragment(R.id.secondary_content_frame,
-                        recreateFragment(detailsFragment),
-                        AppConstants.FRAGTAG_DETAILS);
+                    detailsFragment =
+                            (StepDetailsFragment) recreateFragment(setUpDetailsFragment(null));
+                    replaceFragment(PRIMARY_FRAME,
+                                    detailsFragment,
+                                    AppConstants.FRAGTAG_DETAILS);
+                }
             } else {
+                if (recipesViewModel != null
+                        && recipesViewModel.getRequestedFragment().equals(AppConstants.FRAGTAG_DETAILS)) {
 
-                Log.i(LOG_TAG, "Vids: Replace primary content frame");
-                replaceFragment(R.id.primary_content_frame,
-                        recreateFragment(detailsFragment),
-                        AppConstants.FRAGTAG_DETAILS);
+                    removeFragment(PRIMARY_FRAME,
+                            getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS));
+
+                    addFragment(PRIMARY_FRAME, setUpStepsFragment(null), AppConstants.FRAGTAG_STEPS);
+
+                    detailsFragment =
+                            (StepDetailsFragment) recreateFragment(setUpDetailsFragment(null));
+
+                    replaceFragment(SECONDARY_FRAME,
+                            detailsFragment,
+                            AppConstants.FRAGTAG_DETAILS);
+                }
             }
         }
     }
@@ -121,23 +126,48 @@ public class RecipeActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        getSupportFragmentManager().putFragment(outState, AppConstants.FRAGTAG_DETAILS, detailsFragment);
-        getSupportFragmentManager().putFragment(outState,  AppConstants.FRAGTAG_STEPS, stepsFragment);
+
+        recipesViewModel.fragmentRequestObserver().removeObservers(this);
+        Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+        if(detailsFragment != null) {
+            getSupportFragmentManager().putFragment(outState, AppConstants.FRAGTAG_DETAILS, detailsFragment);
+        }
+    }
+
+    private StepsFragment setUpStepsFragment(@Nullable StepsFragment fragment) {
+        StepsFragment stepsFragment = fragment;
+        if (stepsFragment == null) {
+                stepsFragment = (StepsFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_STEPS);
+                if(stepsFragment == null) {
+                    stepsFragment = new StepsFragment();
+                }
+        }
+        return stepsFragment;
+    }
+
+    private StepDetailsFragment setUpDetailsFragment(@Nullable StepDetailsFragment fragment) {
+        StepDetailsFragment detailsFragment = fragment;
+        if (detailsFragment == null) {
+            detailsFragment = (StepDetailsFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+            if(detailsFragment == null) {
+                detailsFragment = new StepDetailsFragment();
+            }
+        }
+        return detailsFragment;
     }
 
     @Override
     public void onBackPressed() {
-        if ((IS_LANDSCAPE && IS_TABLET) ||
-                stepsFragment != null && stepsFragment.isVisible()) {
+        recipesViewModel.resetRecipeSteps();
 
-            recipesViewModel.requestFragment(AppConstants.FRAGTAG_RECIPES);
-            Log.v(LOG_TAG, "TEST: Clearing Activity TOP");
-            Intent launcherIntent = new Intent(this, LauncherActivity.class);
-            launcherIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(launcherIntent);
+        Log.v(LOG_TAG, "TEST: ############ Backstack count: " + getSupportFragmentManager().getBackStackEntryCount());
+        Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+        if(!IS_LANDSCAPE_TABLET && detailsFragment != null && detailsFragment.isVisible()) {
+            Log.v(LOG_TAG, "TEST: ######## Popping backstack immediately! ######### ");
+            getSupportFragmentManager().popBackStackImmediate(
+                    AppConstants.FRAGTAG_DETAILS, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else {
-            recipesViewModel.requestFragment(AppConstants.FRAGTAG_STEPS);
-            updateFragmentDisplay(AppConstants.FRAGTAG_STEPS);
+            super.onBackPressed();
         }
     }
 
@@ -156,43 +186,29 @@ public class RecipeActivity extends AppCompatActivity
         recipesViewModel = ViewModelProviders.of(this,
                 recipesViewModelFactory).get(RecipesViewModel.class);
 
-        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
+        if (!IS_LANDSCAPE_TABLET) {
+            configureObservers();
+        }
+    }
+
+    private void configureObservers() {
+        recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
             @Override
-            public void onChanged(@Nullable Recipe recipe) {
-                if (detailsFragment == null) {
-                    detailsFragment = new StepDetailsFragment();
+            public void onChanged(@Nullable String fragmentRequestTag) {
+                requestedFragment = fragmentRequestTag;
+                if(fragmentRequestTag != null && fragmentRequestTag.equals(AppConstants.FRAGTAG_DETAILS)) {
+                    replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(null), AppConstants.FRAGTAG_DETAILS);
                 }
-                replaceFragment(PRIMARY_FRAME, detailsFragment, AppConstants.FRAGTAG_DETAILS);
             }
         });
     }
 
-    private void updateFragmentDisplay(String fragmentTag) {
-
-        if(fragmentTag.equals(AppConstants.FRAGTAG_STEPS)) {
-
-            if (stepsFragment == null) {
-                stepsFragment = new StepsFragment();
-            }
-
-            replaceFragment(R.id.primary_content_frame, stepsFragment, AppConstants.FRAGTAG_STEPS);
-
-
-        } else
-        if (fragmentTag.equals(AppConstants.FRAGTAG_DETAILS)) {
-            if(detailsFragment == null) {
-                detailsFragment = new StepDetailsFragment();
-            }
-
-            int contentFrame;
-
-            if(IS_LANDSCAPE && IS_TABLET) {
-                contentFrame = R.id.secondary_content_frame;
-            } else {
-                contentFrame = R.id.primary_content_frame;
-            }
-            replaceFragment(contentFrame, detailsFragment, AppConstants.FRAGTAG_DETAILS);
-        }
+    private void addFragment(int contentFrameID, Fragment fragment, String tag) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(contentFrameID,
+                        fragment, tag)
+                .commit();
     }
 
     /**
@@ -202,24 +218,25 @@ public class RecipeActivity extends AppCompatActivity
      * @param tag The fragment tag which should match which fragment we want to display.
      */
     private void replaceFragment(int contentFrameID, Fragment fragment, String tag) {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStackImmediate();
-        }
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(contentFrameID,
-                        fragment, tag)
-                //.addToBackStack(tag)
+                .replace(contentFrameID, fragment, tag)
+                .addToBackStack(tag)
                 .commit();
     }
 
+    private void removeFragment(int contentFrameID, Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(fragment)
+                .commit();
+    }
     // Note: There must be a better way to do this - it's really slow.
     // (Or I must optimise the rate at which the fragment can be recreated.
     private Fragment recreateFragment(Fragment fragment)
     {
         try {
             Fragment.SavedState savedState = getSupportFragmentManager().saveFragmentInstanceState(fragment);
-
             Fragment newInstance = fragment.getClass().newInstance();
             newInstance.setInitialSavedState(savedState);
 

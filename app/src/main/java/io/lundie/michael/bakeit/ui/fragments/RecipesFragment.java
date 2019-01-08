@@ -88,7 +88,10 @@ public class RecipesFragment extends Fragment {
                 // Select our recipe
                 recipesViewModel.selectRecipeItem(recipe);
                 // Pre-assign the first recipe step item
-                recipesViewModel.selectRecipeStep(recipe.getRecipeSteps().get(0));
+                if (IS_LANDSCAPE_TABLET) {
+                    // Pre-load recipeStep if we are in landscape mode
+                    recipesViewModel.selectRecipeStep(recipe.getRecipeSteps().get(0));
+                }
                 // Request the steps fragment via the view model.
                 // LauncherActivity is observing and will manage fragments accordingly.
                 recipesViewModel.requestFragment(AppConstants.FRAGTAG_STEPS);

@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -60,6 +61,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private SimpleExoPlayer mExoPlayer;
     private MediaSource videoSource;
+    private long mPlayerPositionOnSave;
 
 
 
@@ -131,6 +133,9 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         if (savedInstanceState != null) {
             // Get recipe from saved instance if parcel exists.
             recipeStep = savedInstanceState.getParcelable("mRecipeStep");
+            // Get previously saved player position
+            mPlayerPositionOnSave = savedInstanceState.getLong("mPlayerPosition");
+            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Retrieving position:" + mPlayerPositionOnSave);
         }
 
         previousStepBtn.setOnClickListener(this);
@@ -158,8 +163,9 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             this.configureViewModel();
             getTotalSteps();
         }
-        // If we paused this activity we can be pretty sure our observer was destroyed.
-        // We must restart our observer.
+        if (playerView != null) {
+            playerView.onResume();
+        }
         this.configureObservers();
     }
 
@@ -187,6 +193,14 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+
+        Log.i(LOG_TAG, "TEST: FRAGMENT SAVE INSTANCE STATE CALLED");
+
+        if(mExoPlayer != null) {
+            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:" + mExoPlayer.getCurrentPosition());
+            outState.putLong("mPlayerPosition", mExoPlayer.getCurrentPosition());
+        }
+
         if (recipeStep != null){
             outState.putParcelable("mRecipeStep", recipeStep);
         }
@@ -223,9 +237,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                                 Log.v(LOG_TAG, "Vid: Loading this URI: " + mediaUri.toString());
                                 playerView.setVisibility(View.VISIBLE);
                                 initializePlayer();
+                                mExoPlayer.seekTo(mPlayerPositionOnSave);
                                 prepareMediaSource(mediaUri);
                             } else {
                                 initializePlayer();
+                                mExoPlayer.seekTo(mPlayerPositionOnSave);
                                 if (playerView != null) {
                                     playerView.onResume();
                                 }
@@ -308,7 +324,10 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         // This is the MediaSource representing the media to be played.
         videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(mediaUri);
         mExoPlayer.prepare(videoSource);
+
         mExoPlayer.setPlayWhenReady(true);
+        Log.i(LOG_TAG, "TEST SEEKABLE: " + mExoPlayer.isCurrentWindowSeekable());
+        mExoPlayer.seekTo(mPlayerPositionOnSave);
     }
 
     /**
