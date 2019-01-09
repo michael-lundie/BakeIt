@@ -86,7 +86,6 @@ public class StepsFragment extends Fragment {
         if (mRecipeSteps == null || mRecipeSteps.isEmpty()){
             if (savedInstanceState != null) {
                 mRecipeSteps = savedInstanceState.getParcelableArrayList("mRecipeSteps");
-                Log.i(LOG_TAG, "TEST: Retrieving parcelable data for recipe steps: " + mRecipeSteps);
             } else {
                 mRecipeSteps = new ArrayList<RecipeStep>();
             }
@@ -157,12 +156,10 @@ public class StepsFragment extends Fragment {
 
                 if(selectedRecipe != null) {
 
-                    Log.v(LOG_TAG, "TEST: Selected Recipe is: " + selectedRecipe.getId());
-
                     if(!selectedRecipe.getRecipeSteps().isEmpty()) {
-                        for (int i=0; i < selectedRecipe.getRecipeSteps().size(); i++) {
-                            Log.i(LOG_TAG, "Recipe Step No: " + selectedRecipe.getRecipeSteps().get(i).getStepNumber());
-                        }
+//                        for (int i=0; i < selectedRecipe.getRecipeSteps().size(); i++) {
+//                            Log.i(LOG_TAG, "Recipe Step No: " + selectedRecipe.getRecipeSteps().get(i).getStepNumber());
+//                        }
 
                         mStepsListTv.setText(dataUtils.generateIngredientsList
                                 ((ArrayList<Ingredient>) selectedRecipe.getIngredients()));

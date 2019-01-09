@@ -34,6 +34,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import javax.inject.Inject;
 
@@ -61,7 +62,9 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private SimpleExoPlayer mExoPlayer;
     private MediaSource videoSource;
-    private long mPlayerPositionOnSave;
+    private long mPlayerPosition;
+    private int mPlayerWindow;
+    private boolean mPlayWhenReady;
 
 
 
@@ -99,7 +102,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         //TODO: Add interaction listener, so any interaction with details set's it as default frag
         int currentStepNumber = recipeStep.getStepNumber();
 
-
         switch (view.getId()) {
             case R.id.previous_step_btn:
                 if (currentStepNumber != 0) {
@@ -131,11 +133,21 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         ButterKnife.bind(this, listFragmentView);
 
         if (savedInstanceState != null) {
+
             // Get recipe from saved instance if parcel exists.
+            //TODO: Assign some variable constants
             recipeStep = savedInstanceState.getParcelable("mRecipeStep");
             // Get previously saved player position
-            mPlayerPositionOnSave = savedInstanceState.getLong("mPlayerPosition");
-            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Retrieving position:" + mPlayerPositionOnSave);
+            mPlayerPosition = savedInstanceState.getLong("mPlayerPosition");
+            mPlayerWindow = savedInstanceState.getInt("mPlayerWindow");
+            mPlayWhenReady = savedInstanceState.getBoolean("mPlayWhenReady");
+            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Retrieving position:" + mPlayerPosition);
+
+        } else {
+
+            mPlayerPosition = C.TIME_UNSET;
+            mPlayerWindow = C.INDEX_UNSET;
+            mPlayWhenReady = true;
         }
 
         previousStepBtn.setOnClickListener(this);
@@ -151,7 +163,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         if (playerView != null) {
             playerView.onPause();
         }
-        releasePlayer();
+        //releasePlayer();
         //TODO: Resolve any onPause stuff here.
         Log.v(LOG_TAG, "TEST: ON PAUSE CALLED");
     }
@@ -194,17 +206,26 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
 
-        Log.i(LOG_TAG, "TEST: FRAGMENT SAVE INSTANCE STATE CALLED");
+        Log.i(LOG_TAG, "TEST: FRAGMENT SAVE INSTANCE STATE CALLED blaaaaaaaaaaaaaaaaaaaaaa");
 
-        if(mExoPlayer != null) {
             Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:" + mExoPlayer.getCurrentPosition());
-            outState.putLong("mPlayerPosition", mExoPlayer.getCurrentPosition());
-        }
+            exoPlayerOnSave();
+
+            outState.putLong("mPlayerPosition", mPlayerPosition);
+            outState.putInt("mPlayerWindow", mPlayerWindow);
+            outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
+
 
         if (recipeStep != null){
             outState.putParcelable("mRecipeStep", recipeStep);
         }
         super.onSaveInstanceState(outState);
+    }
+
+    public void exoPlayerOnSave() {
+        mPlayWhenReady = mExoPlayer.getPlayWhenReady();
+        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
+        mPlayerPosition = mExoPlayer.getCurrentPosition();
     }
 
     /**
@@ -236,12 +257,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                             if (!hasOnGoingMediaSession) {
                                 Log.v(LOG_TAG, "Vid: Loading this URI: " + mediaUri.toString());
                                 playerView.setVisibility(View.VISIBLE);
-                                initializePlayer();
-                                mExoPlayer.seekTo(mPlayerPositionOnSave);
-                                prepareMediaSource(mediaUri);
+                                initializePlayer(mediaUri);
+                                //mExoPlayer.seekTo(mPlayerPosition);
                             } else {
-                                initializePlayer();
-                                mExoPlayer.seekTo(mPlayerPositionOnSave);
+                                initializePlayer(mediaUri);
+                                mExoPlayer.seekTo(mPlayerPosition);
                                 if (playerView != null) {
                                     playerView.onResume();
                                 }
@@ -276,10 +296,8 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     /**
      * Initialize ExoPlayer.
      */
-    private void initializePlayer() {
-        if (mExoPlayer != null) {
-            resetPlayer();
-        } else {
+    private void initializePlayer(Uri mediaUri) {
+        if (mExoPlayer == null) {
             //Create an instance of the ExoPlayer.
 
             TrackSelector trackSelector = new DefaultTrackSelector();
@@ -290,44 +308,52 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
             attachPlayerView();
 
-            // Set the ExoPlayer.EventListener to this activity.
-            mExoPlayer.addListener(new Player.EventListener() {
-                @Override
-                public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
-
-                }
-
-                @Override
-                public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-                }
-
-                @Override
-                public void onLoadingChanged(boolean isLoading) {
-                    Log.v(LOG_TAG, "Vid: Loading changed: " + isLoading);
-                }
-
-                @Override
-                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                    Log.v(LOG_TAG, "Vid: Player State Changed:");
-                }
-            });
+            mExoPlayer.setPlayWhenReady(true);
         }
+
+        prepareMediaSource(mediaUri);
+
+        // Set the ExoPlayer.EventListener to this activity.
+        mExoPlayer.addListener(new Player.EventListener() {
+            @Override
+            public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
+
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+            }
+
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+                Log.v(LOG_TAG, "Vid: Loading changed: " + isLoading);
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                Log.v(LOG_TAG, "Vid: Player State Changed:");
+            }
+        });
+
+        // Restore the playback position
+        boolean hasStartingPos = mPlayerWindow != C.INDEX_UNSET;
+        if (hasStartingPos) {
+            mExoPlayer.seekTo(mPlayerWindow, mPlayerPosition);
+        }
+        mExoPlayer.prepare(videoSource,!hasStartingPos, false);
+
     }
 
     private void prepareMediaSource(Uri mediaUri) {
 
         // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getActivity(),
-                Util.getUserAgent(getActivity(), this.getString(R.string.app_name)));
+        DataSource.Factory dataSourceFactory =
+                new DefaultHttpDataSourceFactory(Util.getUserAgent(getActivity(), this.getString(R.string.app_name)));
 
         // This is the MediaSource representing the media to be played.
         videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(mediaUri);
-        mExoPlayer.prepare(videoSource);
 
-        mExoPlayer.setPlayWhenReady(true);
-        Log.i(LOG_TAG, "TEST SEEKABLE: " + mExoPlayer.isCurrentWindowSeekable());
-        mExoPlayer.seekTo(mPlayerPositionOnSave);
     }
 
     /**
