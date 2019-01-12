@@ -40,7 +40,10 @@ public class IngredientsFragment extends Fragment {
 
     ArrayList<Ingredient> mIngredientsList;
 
+    @Inject
     IngredientsViewAdapter mAdapter;
+
+    RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -62,12 +65,9 @@ public class IngredientsFragment extends Fragment {
             }
         }
 
-        mAdapter = new IngredientsViewAdapter(mIngredientsList);
         // Set the adapter
         if (view instanceof RecyclerView) {
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(mAdapter);
+            recyclerView = (RecyclerView) view;
         }
         return view;
     }
@@ -79,6 +79,8 @@ public class IngredientsFragment extends Fragment {
         if(recipesViewModel == null) {
             this.configureViewModel();
             this.configureData();
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            recyclerView.setAdapter(mAdapter);
         }
     }
 

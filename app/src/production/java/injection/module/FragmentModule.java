@@ -15,7 +15,7 @@ public abstract class FragmentModule {
     @ContributesAndroidInjector
     abstract StepsFragment contributeStepsFragment();
 
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = IngredientsViewAdapterModule.class )
     abstract IngredientsFragment contributeIngredientsFragment();
 
     @ContributesAndroidInjector

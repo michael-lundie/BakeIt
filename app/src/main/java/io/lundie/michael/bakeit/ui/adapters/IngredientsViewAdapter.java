@@ -11,7 +11,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Ingredient;
-import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.ui.fragments.dummy.DummyContent.DummyItem;
 import io.lundie.michael.bakeit.ui.fragments.utils.DataUtils;
 
@@ -25,13 +24,13 @@ import javax.inject.Inject;
  */
 public class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.ViewHolder> {
 
-    @Inject
     DataUtils dataUtils;
 
-    private ArrayList<Ingredient> mIngredients;
+    private ArrayList<Ingredient> mIngredients = new ArrayList<>();
 
-    public IngredientsViewAdapter(ArrayList<Ingredient> ingredients) {
-        mIngredients = ingredients;
+    @Inject
+    public IngredientsViewAdapter(DataUtils dataUtils) {
+        this.dataUtils = dataUtils;
     }
 
     @Override
