@@ -8,7 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -67,13 +70,19 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         notifyDataSetChanged();
     }
 
+    @Override public int getItemViewType(int position) { return position; }
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final View mView;
 
         // Bind views using butterknife
+        @BindView(R.id.list_step_top_spacer) View recipeStepTopSpacer;
         @BindView(R.id.list_step_name_tv) TextView recipeStepShortDescription;
+        @BindView(R.id.list_step_number) TextView recipeStepNumber;
+        @BindView(R.id.recipe_step_icon_cam) ImageView recipeStepIconCam;
+        @BindView(R.id.recipe_step_icon_note) ImageView recipeStepIconNote;
 
         ViewHolder(View view) {
             super(view);
@@ -82,7 +91,20 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         }
 
         void bind(final RecipeStep recipeStep, final StepsViewAdapter.OnItemClickListener listener) {
+
+            if(recipeStep.getStepNumber() == 0) {
+                recipeStepTopSpacer.setVisibility(View.INVISIBLE);
+            }
+
             recipeStepShortDescription.setText(recipeStep.getShortDescription());
+            Integer stepNumber = recipeStep.getStepNumber() + 1;
+            recipeStepNumber.setText(stepNumber.toString());
+
+            if(recipeStep.getVideoURL().isEmpty()) {
+                Log.i(LOG_TAG, "TEST: VIDEO URL NULL");
+                recipeStepIconCam.setVisibility(View.GONE);
+                recipeStepIconNote.setVisibility(View.VISIBLE);
+            }
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

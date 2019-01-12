@@ -24,11 +24,8 @@ public class RecipesViewModel extends ViewModel {
     // MutableLiveData variables for handling data fetched via repo
     private static MutableLiveData<ArrayList<Recipe>> recipeListMutableLiveData;
     private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
-    private static MutableLiveData<Long> recipeVideoPlaybackPosition  = new MutableLiveData<>();;
     private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData = new MutableLiveData<>();
     private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
-    private static MutableLiveData<String> previousFragmentRequestTag = new MutableLiveData<>();
-
 
     public RecipesViewModel() { /* Required empty constructor. */ }
 
@@ -51,7 +48,6 @@ public class RecipesViewModel extends ViewModel {
         if(recipeListMutableLiveData == null) {
             // Instantiate MutableLiveData object
             recipeListMutableLiveData = new MutableLiveData<>();
-
         }
 
         // We would handle any potential refreshing withing the repository class.
@@ -97,44 +93,18 @@ public class RecipesViewModel extends ViewModel {
         return selectedRecipeMutableLiveData.getValue().getRecipeSteps().size();
     }
 
-    public void resetRecipeSteps() {
-        selectedRecipeStepLiveData.setValue(null);
-    }
-
-    public void setRecipeVideoPlaybackPosition(long playbackPosition) {
-        Log.i(LOG_TAG, "TEST: position before: " + playbackPosition);
-        recipeVideoPlaybackPosition.setValue(playbackPosition);
-        Log.i(LOG_TAG, "TEST: position after: " + recipeVideoPlaybackPosition.getValue());
-    }
-
-    public long getRecipeVideoPlaybackPosition() {
-        Long playbackPosition = 0L;
-        if(recipeVideoPlaybackPosition != null) {
-            playbackPosition = recipeVideoPlaybackPosition.getValue();
-            Log.i(LOG_TAG, "Test - view model >>> pp: " + playbackPosition);
-            recipeVideoPlaybackPosition.setValue(null);
-        }
-        return playbackPosition==null?0:playbackPosition;
-    }
     /**
      * @return a reference to the previously selected recipe item object if it exists.
      */
     public LiveData<RecipeStep> getSelectedRecipeStep() { return selectedRecipeStepLiveData; }
 
     public void requestFragment(String fragmentTag) {
-        previousFragmentRequestTag.setValue(fragmentRequestedTag.getValue());
         fragmentRequestedTag.setValue(fragmentTag);
     }
 
-    public String getRequestedFragment() {
-        return fragmentRequestedTag.getValue();
-    }
 
     public LiveData<String> fragmentRequestObserver() {
         return fragmentRequestedTag;
     }
 
-    public String getPreviousFragmentRequestTag() {
-        return previousFragmentRequestTag.getValue();
-    }
 }

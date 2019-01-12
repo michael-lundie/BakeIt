@@ -33,7 +33,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import javax.inject.Inject;
@@ -82,7 +81,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     RecipeStep recipeStep;
 
     int totalSteps;
-    Uri mediaUri;
+    Uri mMediaUri;
 
     @BindView(R.id.detail_test_tv) TextView testTextTv;
     @BindView(R.id.previous_step_btn) Button previousStepBtn;
@@ -99,7 +98,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onClick(View view) {
-        //TODO: Add interaction listener, so any interaction with details set's it as default frag
         int currentStepNumber = recipeStep.getStepNumber();
 
         switch (view.getId()) {
@@ -141,7 +139,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             mPlayerPosition = savedInstanceState.getLong("mPlayerPosition");
             mPlayerWindow = savedInstanceState.getInt("mPlayerWindow");
             mPlayWhenReady = savedInstanceState.getBoolean("mPlayWhenReady");
-            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Retrieving position:" + mPlayerPosition);
+            mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
 
         } else {
 
@@ -173,12 +171,13 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         super.onResume();
         if(recipesViewModel == null) {
             this.configureViewModel();
+            this.configureObservers();
             getTotalSteps();
         }
         if (playerView != null) {
             playerView.onResume();
         }
-        this.configureObservers();
+
     }
 
     @Override
@@ -211,6 +210,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:" + mExoPlayer.getCurrentPosition());
             exoPlayerOnSave();
 
+            outState.putString("mMediaUri", mMediaUri.toString());
             outState.putLong("mPlayerPosition", mPlayerPosition);
             outState.putInt("mPlayerWindow", mPlayerWindow);
             outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
@@ -253,20 +253,19 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                     testTextTv.setText(selectedRecipeStep.getShortDescription());
 
                     if(!selectedRecipeStep.getVideoURL().isEmpty()) {
-                        mediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
-                            if (!hasOnGoingMediaSession) {
-                                Log.v(LOG_TAG, "Vid: Loading this URI: " + mediaUri.toString());
-                                playerView.setVisibility(View.VISIBLE);
-                                initializePlayer(mediaUri);
-                                //mExoPlayer.seekTo(mPlayerPosition);
-                            } else {
-                                initializePlayer(mediaUri);
-                                mExoPlayer.seekTo(mPlayerPosition);
-                                if (playerView != null) {
-                                    playerView.onResume();
-                                }
 
-                            }
+                        Uri mediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
+
+                        if(mMediaUri != null && !mMediaUri.equals(mediaUri)) {
+                            // Reset player to 0 if we are choosing a new recipe step.
+                            mPlayerPosition = 0;
+                        }
+                        mMediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
+
+                                Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
+                                playerView.setVisibility(View.VISIBLE);
+                                initializePlayer(mMediaUri);
+
                             //TODO: Check network connectivity
                     } else {
                         //TODO: Should we release player here?

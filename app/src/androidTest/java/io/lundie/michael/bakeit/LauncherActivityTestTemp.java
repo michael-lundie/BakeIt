@@ -1,6 +1,5 @@
 package io.lundie.michael.bakeit;
 
-import android.test.suitebuilder.annotation.LargeTest;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -25,7 +24,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.AllOf.allOf;
 
-@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class LauncherActivityTestTemp {
 

@@ -77,7 +77,7 @@ public class RecipesFragment extends Fragment {
                 mRecipeList = savedInstanceState.getParcelableArrayList("mRecipeList");
                 Log.i(LOG_TAG, "TEST: Retrieving parcelable data for recipe steps: " + mRecipeList);
             } else {
-                mRecipeList = new ArrayList<Recipe>();
+                mRecipeList = new ArrayList<>();
             }
         }
 

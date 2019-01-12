@@ -8,6 +8,10 @@
     <string name="details_prev_btn">Previous Step</string>
     <string name="details_next_btn">Next Step</string>
 
+    <!-- Contents Fragments -->
+
+    <string name="steps_fragment_ingredients_title">Ingredients</string>
+    <string name="steps_fragment_steps_title">Steps</string>
 
     <!-- Fragment Tags -->
     <string name="fragtag_recipes">frag_recipes</string>
@@ -28,5 +32,6 @@
     <string name="text_cup">cups of</string>
     <string name="acronym_ounce">OZ</string>
     <string name="text_ounce">ounces of</string>
+
 
 </resources>

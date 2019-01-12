@@ -26,6 +26,7 @@ import io.lundie.michael.bakeit.App;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
+import io.lundie.michael.bakeit.ui.fragments.RecipePagerFragment;
 import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
 import io.lundie.michael.bakeit.ui.fragments.StepDetailsFragment;
 import io.lundie.michael.bakeit.ui.fragments.StepsFragment;
@@ -55,7 +56,7 @@ public class RecipeActivity extends AppCompatActivity
     RecipesViewModel recipesViewModel;
 
     // Holding local references to our variables so we can access them easily.
-    StepsFragment stepsFragment;
+    RecipePagerFragment pagerFragment;
     StepDetailsFragment detailsFragment;
 
 
@@ -99,15 +100,15 @@ public class RecipeActivity extends AppCompatActivity
         }
     }
 
-    private StepsFragment setUpStepsFragment() {
+    private RecipePagerFragment setUpStepsFragment() {
 
-        stepsFragment = (StepsFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_STEPS);
-        if(stepsFragment == null) {
-            stepsFragment = new StepsFragment();
+        pagerFragment = (RecipePagerFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_STEPS);
+        if(pagerFragment == null) {
+            pagerFragment = new RecipePagerFragment();
         } else {
-            stepsFragment = (StepsFragment) recreateFragment(stepsFragment);
+            pagerFragment = (RecipePagerFragment) recreateFragment(pagerFragment);
         }
-        return stepsFragment;
+        return pagerFragment;
     }
 
     private StepDetailsFragment setUpDetailsFragment() {

@@ -71,7 +71,6 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
 
         final View mView;
 
-        // Bind views using butterknife
         @BindView(R.id.list_recipe_name_tv) TextView recipeNameTv;
         @BindView(R.id.list_recipe_servings) TextView servingsTv;
 

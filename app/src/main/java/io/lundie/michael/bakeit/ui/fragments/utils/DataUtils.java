@@ -40,6 +40,10 @@ public class DataUtils {
         return ingredientsBuilder.toString();
     }
 
+    public String parseQuantity(Double quantity, String measure) {
+        return quantity.toString().replaceAll("\\.?0*$", "") + " " + getMeasurement(measure);
+    }
+
     private String getMeasurement(String acronym) {
         if(acronym.equals(mApplication.getString(R.string.acronym_grams)))
         {
