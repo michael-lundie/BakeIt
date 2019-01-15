@@ -26,8 +26,7 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 @Module(includes = {ViewModelModule.class,
                     AppConstantsModule.class,
                     SharedPreferencesModule.class,
-                    DataUtilsModule.class,
-                    ExoPlayerModule.class})
+                    DataUtilsModule.class})
 public class AppModule {
 
     private static final String LOG_TAG = AppModule.class.getSimpleName();

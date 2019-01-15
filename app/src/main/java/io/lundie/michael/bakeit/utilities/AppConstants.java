@@ -13,6 +13,7 @@ import io.lundie.michael.bakeit.R;
 public class AppConstants {
 
     Application mApplication;
+    public static final String RECIPES_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
     public static String FRAGTAG_RECIPES;
     public static String FRAGTAG_STEPS;
     public static String FRAGTAG_DETAILS;
