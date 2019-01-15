@@ -30,7 +30,7 @@ public class AppExecutors {
     public static AppExecutors getInstance() {
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new AppExecutors(Executors.newFixedThreadPool(3),
+                sInstance = new AppExecutors(Executors.newFixedThreadPool(4),
                         new MainThreadExecutor());
             }
         }
@@ -39,6 +39,10 @@ public class AppExecutors {
 
     public Executor networkIO() {
         return networkIO;
+    }
+
+    public Executor mainThread() {
+        return mainThread;
     }
 
     public static class MainThreadExecutor implements Executor {
