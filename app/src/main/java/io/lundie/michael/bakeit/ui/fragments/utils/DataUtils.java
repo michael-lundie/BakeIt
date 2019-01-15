@@ -15,7 +15,7 @@ public class DataUtils {
     Context mApplication;
 
     @Inject
-    public DataUtils(Application application) {
+    public DataUtils(Context application) {
         mApplication = application;
     }
 

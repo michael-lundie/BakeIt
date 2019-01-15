@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem}
- * TODO: Replace the implementation with code for your data type.
+ * {@link RecyclerView.Adapter} that can display a {@link Ingredient}
  */
 public class IngredientsViewAdapter extends RecyclerView.Adapter<IngredientsViewAdapter.ViewHolder> {
 

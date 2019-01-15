@@ -54,6 +54,7 @@ public class RecipeRepositoryMain implements RecipeRepository {
     }
 
     private void retrieveFromJSON() {
+        //TODO: Put this into a seperate thread
         Reader reader = new InputStreamReader(assetProvider.getJsonFile());
 
         Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();

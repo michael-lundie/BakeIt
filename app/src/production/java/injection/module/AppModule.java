@@ -1,6 +1,7 @@
 package injection.module;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,6 +13,7 @@ import dagger.Provides;
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
 import io.lundie.michael.bakeit.datamodel.RecipeRepositoryMain;
 import io.lundie.michael.bakeit.utilities.AssetProvider;
+import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 
 /**
@@ -23,6 +25,7 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
  */
 @Module(includes = {ViewModelModule.class,
                     AppConstantsModule.class,
+                    SharedPreferencesModule.class,
                     DataUtilsModule.class,
                     ExoPlayerModule.class})
 public class AppModule {
@@ -34,6 +37,13 @@ public class AppModule {
     @Singleton
     AssetProvider localFileProvider(Application application) {
         return new AssetProvider(application);
+    }
+
+    // Preference Injection
+    @Provides
+    @Singleton
+    Prefs providePrefs(SharedPreferences sharedPrefs) {
+        return new Prefs(sharedPrefs);
     }
 
     // Provides GSON

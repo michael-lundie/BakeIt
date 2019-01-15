@@ -13,6 +13,8 @@
     <string name="steps_fragment_ingredients_title">Ingredients</string>
     <string name="steps_fragment_steps_title">Steps</string>
 
+    <!-- Widget Strings -->
+    <string name="widget_list_empty">You have not yet chosen a recipe for which to display the ingredients.</string>
     <!-- Fragment Tags -->
     <string name="fragtag_recipes">frag_recipes</string>
     <string name="fragtag_steps">frag_steps</string>
@@ -32,6 +34,8 @@
     <string name="text_cup">cups of</string>
     <string name="acronym_ounce">OZ</string>
     <string name="text_ounce">ounces of</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 
 </resources>

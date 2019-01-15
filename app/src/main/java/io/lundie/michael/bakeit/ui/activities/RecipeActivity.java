@@ -7,31 +7,41 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.LayoutAnimationController;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import io.lundie.michael.bakeit.App;
 import io.lundie.michael.bakeit.R;
+import io.lundie.michael.bakeit.datamodel.models.Ingredient;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.ui.fragments.RecipePagerFragment;
 import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
 import io.lundie.michael.bakeit.ui.fragments.StepDetailsFragment;
 import io.lundie.michael.bakeit.ui.fragments.StepsFragment;
+import io.lundie.michael.bakeit.ui.fragments.utils.DataUtils;
 import io.lundie.michael.bakeit.utilities.AppConstants;
+import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
+import io.lundie.michael.bakeit.widget.IngredientsWidgetProvider;
 
 public class RecipeActivity extends AppCompatActivity
         implements HasSupportFragmentInjector {
@@ -45,6 +55,12 @@ public class RecipeActivity extends AppCompatActivity
     ViewModelProvider.Factory recipesViewModelFactory;
 
     @Inject AppConstants appConstants;
+
+    @Inject DataUtils dataUtils;
+
+    @Inject Prefs prefs;
+
+    @BindView(R.id.send_to_widget_fab) FloatingActionButton sendToWidgetFab;
 
     static boolean IS_LANDSCAPE_TABLET;
 
@@ -64,12 +80,14 @@ public class RecipeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe);
+        ButterKnife.bind(this);
 
         IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
 
         //Configure Dagger 2 injection
         this.configureDagger();
         this.configureViewModel();
+
 
         if(savedInstanceState == null) {
             if(IS_LANDSCAPE_TABLET) {
@@ -86,6 +104,24 @@ public class RecipeActivity extends AppCompatActivity
                     replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
                 }
             }
+        }
+
+        sendToWidgetFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                broadcastRecipeToWidget();
+            }
+        });
+    }
+
+    private void broadcastRecipeToWidget() {
+
+        Recipe recipe = recipesViewModel.getSelectedRecipe().getValue();
+        if(recipe != null) {
+            Intent widgetIntent = new Intent(getApplicationContext(), IngredientsWidgetProvider.class);
+            widgetIntent.setAction(IngredientsWidgetProvider.ACTION_UPDATE_WIDGET_INGREDIENTS);
+            widgetIntent.putExtra(IngredientsWidgetProvider.RECIPE_DATA, recipe);
+            this.sendBroadcast(widgetIntent);
         }
     }
 

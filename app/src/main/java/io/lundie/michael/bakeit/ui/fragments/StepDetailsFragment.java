@@ -50,28 +50,14 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private static final String LOG_TAG = StepDetailsFragment.class.getName();
 
-    // Setting up some static variables
-    private static boolean IS_LANDSCAPE_TABLET;
-    private static boolean IS_TABLET;
-
-
-
-    private boolean hasInitialisedPlayer = false;
-    private boolean hasOnGoingMediaSession = false;
+    private final static boolean ON_RESUME_TRUE = true;
+    private final static boolean ON_RESUME_FALSE = false;
 
     private SimpleExoPlayer mExoPlayer;
     private MediaSource videoSource;
     private long mPlayerPosition;
     private int mPlayerWindow;
     private boolean mPlayWhenReady;
-
-
-
-    private Handler mainHandler;
-    private TrackSelection.Factory videoTrackSelectionFactory;
-    private TrackSelector trackSelector;
-    private LoadControl loadControl;
-    private DataSource.Factory dataSourceFactory;
 
     @Inject
     ViewModelProvider.Factory recipesViewModelFactory;
@@ -120,10 +106,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Checking the current orientation and device
-        IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
-        IS_TABLET = getResources().getBoolean(R.bool.isTablet);
-
         // Inflate the layout for this fragment
         View listFragmentView =  inflater.inflate(R.layout.fragment_details, container, false);
 
@@ -142,7 +124,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
 
         } else {
-
             mPlayerPosition = C.TIME_UNSET;
             mPlayerWindow = C.INDEX_UNSET;
             mPlayWhenReady = true;
@@ -156,12 +137,23 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-        if (playerView != null) {
-            playerView.onPause();
+        if(mExoPlayer != null) {
+            exoPlayerOnSave();
+            if (Util.SDK_INT <= 23) {
+                if (playerView != null) {
+                    playerView.onPause();
+                }
+                releasePlayer();
+            }
         }
-        //releasePlayer();
+
         //TODO: Resolve any onPause stuff here.
         Log.v(LOG_TAG, "TEST: ON PAUSE CALLED");
     }
@@ -171,20 +163,19 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         super.onResume();
         if(recipesViewModel == null) {
             this.configureViewModel();
-            this.configureObservers();
+            this.configureObservers(ON_RESUME_TRUE);
             getTotalSteps();
         }
-        if (playerView != null) {
-            playerView.onResume();
-        }
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (playerView != null) {
-            playerView.onPause();
+        if (Util.SDK_INT > 23) {
+            if (playerView != null) {
+                playerView.onPause();
+            }
+            releasePlayer();
         }
         releasePlayer();
     }
@@ -197,7 +188,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
         if(recipesViewModel == null) {
             this.configureViewModel();
-            this.configureObservers();
+            this.configureObservers(ON_RESUME_FALSE);
             getTotalSteps();
         }
     }
@@ -207,13 +198,13 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
         Log.i(LOG_TAG, "TEST: FRAGMENT SAVE INSTANCE STATE CALLED blaaaaaaaaaaaaaaaaaaaaaa");
 
-            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:" + mExoPlayer.getCurrentPosition());
-            exoPlayerOnSave();
+            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:");
 
-            outState.putString("mMediaUri", mMediaUri.toString());
-            outState.putLong("mPlayerPosition", mPlayerPosition);
-            outState.putInt("mPlayerWindow", mPlayerWindow);
-            outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
+
+        outState.putString("mMediaUri", mMediaUri.toString());
+        outState.putLong("mPlayerPosition", mPlayerPosition);
+        outState.putInt("mPlayerWindow", mPlayerWindow);
+        outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
 
 
         if (recipeStep != null){
@@ -240,7 +231,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     }
 
-    private void configureObservers() {
+    private void configureObservers(Boolean onResume) {
         recipesViewModel.getSelectedRecipeStep().removeObservers(this);
 
         recipesViewModel.getSelectedRecipeStep().observe(this, new Observer<RecipeStep>() {
@@ -262,10 +253,15 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                         }
                         mMediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
 
-                                Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
-                                playerView.setVisibility(View.VISIBLE);
-                                initializePlayer(mMediaUri);
+                        Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
+                        playerView.setVisibility(View.VISIBLE);
+                        initializePlayer(mMediaUri);
 
+                        if(onResume) {
+                            if (playerView != null) {
+                                playerView.onResume();
+                            }
+                        }
                             //TODO: Check network connectivity
                     } else {
                         //TODO: Should we release player here?
