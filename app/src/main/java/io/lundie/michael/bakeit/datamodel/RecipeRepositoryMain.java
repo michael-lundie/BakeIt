@@ -49,7 +49,12 @@ public class RecipeRepositoryMain implements RecipeRepository {
         this.lruCache = lruCache;
     }
 
-
+    /**
+     * Returns our LiveData object when requested by (presumably) the viewmodel.
+     * NOTE: The testing version of the repo does not fetch live Data. It fetches static
+     * data from a JSON file.
+     * @return
+     */
     @Override
     public MutableLiveData<ArrayList<Recipe>> getRecipes() {
 
@@ -59,11 +64,8 @@ public class RecipeRepositoryMain implements RecipeRepository {
 
         if(recipesLiveData.getValue() == null || recipesLiveData.getValue().isEmpty()) {
             if(!attemptCacheRetrieval()) {
-                //TODO: Testing - implement JSON retrieval only.
-                //retrieveFromJSON();
                 fetchRecipesOverNetwork();
             }
-
         }
         return recipesLiveData;
     }
@@ -121,7 +123,6 @@ public class RecipeRepositoryMain implements RecipeRepository {
             // If the request was successful (response code 200),
             // then read the input stream and parse the response.
             if (urlConnection.getResponseCode() == 200) {
-                Log.v(LOG_TAG, ">>>>>>>>>>>>>>>>>>>>FETCHING FROM NETWORK <<<<<<<<<<<<<<<<<<<<<<<<");
                 inputStream = urlConnection.getInputStream();
                 Reader reader = new InputStreamReader(inputStream, "UTF-8");
                 recipes = convertStreamWithGson(reader);
@@ -144,20 +145,6 @@ public class RecipeRepositoryMain implements RecipeRepository {
     private ArrayList<Recipe> convertStreamWithGson(Reader reader) {
         Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();
         return gson.fromJson(reader, recipeListType);
-    }
-
-
-    private void retrieveFromJSON() {
-        //TODO: Put this into a seperate thread
-        Reader reader = new InputStreamReader(assetProvider.getJsonFile());
-
-        Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();
-
-        ArrayList<Recipe> recipeList = gson.fromJson(reader, recipeListType);
-
-        sendToCache(recipeList);
-
-        recipesLiveData.setValue(recipeList);
     }
 
     private void sendToCache(ArrayList<Recipe> recipes) {

@@ -52,11 +52,8 @@ public class RecipeRepositoryFake implements RecipeRepository {
 
     private void retrieveFromJSON() {
         Reader reader = new InputStreamReader(assetProvider.getJsonFile());
-
         Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();
-
         ArrayList<Recipe> recipeList = gson.fromJson(reader, recipeListType);
-
         recipes.setValue(recipeList);
     }
 

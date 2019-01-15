@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 
 /**
- * Very simple LRU Cache implementation.
+ * Very simple LRU Cache implementation used in place of an offline access model (using ROOM
+ * for example) for the sake of brevity.
  */
 public class SimpleLruCache {
     private LruCache<Object, ArrayList<Recipe>> lru;
