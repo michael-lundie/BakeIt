@@ -36,4 +36,19 @@ public class AppUtils {
         //Connectivity manager is null so returning false.
         return false;
     }
+
+    public static String replaceNumberedDescription(String descriptionString) {
+        if(!descriptionString.isEmpty()) {
+
+            String substring = descriptionString.substring(0, 5);
+            int removeCharacters = 0;
+
+            for (int i = 0; i < substring.length(); i++) {
+                String c = Character.toString(substring.charAt(i));
+                if (c.matches("[0-9\\s.]")) {
+                    removeCharacters++;
+                }
+            }return descriptionString.substring(removeCharacters, descriptionString.length());
+        } return null;
+    }
 }

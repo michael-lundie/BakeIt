@@ -35,34 +35,34 @@ public class VideoThumbnailUtility {
                 @Override
                 public void onRunCompletion() {
                     ImageView thumbnailView = view.findViewById(binding.getKey());
+                    BitmapDrawable bitmapDrawable;
+                    if(bitmap != null) {
+                        // Create a new bitmap drawable
+                        bitmapDrawable = new BitmapDrawable(
+                                context.getResources(), bitmap);
+                    } else {
+                        ContextCompat.getDrawable(context, R.drawable.no_thumbnail);
+                        bitmapDrawable = new BitmapDrawable(
+                                context.getResources(), BitmapFactory.decodeResource(
+                                context.getResources(), R.drawable.no_thumbnail));
+                    }
 
-                        AppExecutors.getInstance().mainThread().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (bitmap != null) {
-                                    // Create a new bitmap drawable
-                                    BitmapDrawable bitmapDrawable = new BitmapDrawable(
-                                            context.getResources(), bitmap);
-                                    //Add the drawable to our cache instance
-                                    CacheManager.getInstance().addBitmapToMemoryCache(
-                                            id, bitmapDrawable);
-                                    //Set the drawable to our fragment thumbnail view
-                                    thumbnailView.setImageDrawable(bitmapDrawable);
-                                    //Show our thumbnail
-                                    thumbnailView.setVisibility(View.VISIBLE);
+                    //Add the drawable to our cache instance
+                    CacheManager.getInstance().addBitmapToMemoryCache(
+                            id, bitmapDrawable);
 
-                                } else {
-
-                                    ContextCompat.getDrawable(context, R.drawable.no_thumbnail);
-                                    BitmapDrawable noThumbnail = new BitmapDrawable(
-                                            context.getResources(), BitmapFactory.decodeResource(
-                                                    context.getResources(), R.drawable.no_thumbnail));
-                                    CacheManager.getInstance().addBitmapToMemoryCache(id, noThumbnail);
-                                }
-                                //Hide the UI progress spinner
-                                progressBar.setVisibility(View.INVISIBLE);
-                            }
-                        });
+                    //Update our view on the main thread.
+                    AppExecutors.getInstance().mainThread().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            //Set the drawable to our fragment thumbnail view
+                            thumbnailView.setImageDrawable(bitmapDrawable);
+                            //Show our thumbnail
+                            thumbnailView.setVisibility(View.VISIBLE);
+                            //Hide the UI progress spinner
+                            progressBar.setVisibility(View.INVISIBLE);
+                        }
+                    });
                 }
             }) {
                 @Override

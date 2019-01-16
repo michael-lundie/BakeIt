@@ -30,7 +30,7 @@ public class AppExecutors {
     public static AppExecutors getInstance() {
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new AppExecutors(Executors.newFixedThreadPool(4),
+                sInstance = new AppExecutors(Executors.newFixedThreadPool(2),
                         new MainThreadExecutor());
             }
         }

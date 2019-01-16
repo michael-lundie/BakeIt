@@ -90,20 +90,10 @@ public class RecipeActivity extends AppCompatActivity
 
 
         if(savedInstanceState == null) {
-            if(IS_LANDSCAPE_TABLET) {
-                addFragment(SECONDARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
-                addFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
-            } else {
-                addFragment(PRIMARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
-            }
+            setUpFragments();
         } else {
-            if(IS_LANDSCAPE_TABLET) {
-                replaceFragment(SECONDARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
-                Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
-                if(detailsFragment == null) {
-                    replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
-                }
-            }
+            //Resuming from saved instance / Rotation
+            restoreFragments();
         }
 
         sendToWidgetFab.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +102,29 @@ public class RecipeActivity extends AppCompatActivity
                 broadcastRecipeToWidget();
             }
         });
+    }
+
+    private void setUpFragments() {
+        if(IS_LANDSCAPE_TABLET) {
+            addFragment(SECONDARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
+            addFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
+        } else {
+            addFragment(PRIMARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
+        }
+    }
+
+    private void restoreFragments() {
+        if(IS_LANDSCAPE_TABLET) {
+            boolean fragmentPopped = getSupportFragmentManager().popBackStackImmediate (AppConstants.FRAGTAG_STEPS, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            if(!fragmentPopped) {
+                Log.v(LOG_TAG, "Main view restored successfully");
+            }
+            replaceFragment(SECONDARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
+            Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+            if(detailsFragment == null) {
+                replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
+            }
+        }
     }
 
     private void broadcastRecipeToWidget() {
@@ -157,8 +170,6 @@ public class RecipeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-
-        int stackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
         Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
         Boolean isVisible = false;
 
@@ -166,14 +177,11 @@ public class RecipeActivity extends AppCompatActivity
             isVisible = detailsFragment.isVisible();
         }
 
-
-        if(!IS_LANDSCAPE_TABLET && isVisible && stackEntryCount > 0) {
-            getSupportFragmentManager().popBackStackImmediate(
-                AppConstants.FRAGTAG_DETAILS, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if(!IS_LANDSCAPE_TABLET && isVisible) {
+            replaceFragment(PRIMARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
         } else {
             finish();
         }
-
     }
 
     @Override

@@ -128,9 +128,14 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
             }
 
             recipeStepShortDescription.setText(recipeStep.getShortDescription());
-            Integer stepNumber = recipeStep.getStepNumber() +1;
+
+            Integer stepNumber = recipeStep.getStepNumber();
+
             Log.v(LOG_TAG, "Step number: " + stepNumber);
-            recipeStepNumber.setText(stepNumber.toString());
+
+            if(stepNumber != 0) {
+                recipeStepNumber.setText(stepNumber.toString());
+            }
 
             if(recipeStep.getVideoURL().isEmpty()) {
                 Log.i(LOG_TAG, "TEST: VIDEO URL NULL");

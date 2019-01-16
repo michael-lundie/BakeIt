@@ -35,6 +35,10 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -44,6 +48,7 @@ import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.utilities.AppConstants;
+import io.lundie.michael.bakeit.utilities.AppUtils;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
 public class StepDetailsFragment extends Fragment implements View.OnClickListener {
@@ -70,6 +75,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     Uri mMediaUri;
 
     @BindView(R.id.detail_test_tv) TextView testTextTv;
+    @BindView(R.id.detail_instruction_tv) TextView instructionsTv;
     @BindView(R.id.previous_step_btn) Button previousStepBtn;
     @BindView(R.id.next_step_btn) Button nextStepBtn;
     @BindView(R.id.video_pv) PlayerView playerView;
@@ -197,11 +203,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-
-        Log.i(LOG_TAG, "TEST: FRAGMENT SAVE INSTANCE STATE CALLED blaaaaaaaaaaaaaaaaaaaaaa");
-
-            Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:");
-
         if(mMediaUri != null) {
             outState.putString("mMediaUri", mMediaUri.toString());
         }
@@ -243,7 +244,23 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                 if(selectedRecipeStep != null) {
                     Log.v(LOG_TAG, "Observer Changed: " +selectedRecipeStep.getDescription());
                     recipeStep = selectedRecipeStep;
-                    testTextTv.setText(selectedRecipeStep.getShortDescription());
+
+                    String descriptionString = selectedRecipeStep.getShortDescription();
+                    String instructionsString = selectedRecipeStep.getDescription();
+
+                    if(!descriptionString.isEmpty()) {
+                        testTextTv.setText(descriptionString);
+                    } else {
+                        testTextTv.setVisibility(View.INVISIBLE);
+                    }
+
+                    if(!instructionsString.isEmpty()) {
+                        instructionsTv.setText(AppUtils.replaceNumberedDescription(instructionsString));
+                    } else {
+                        instructionsTv.setText(getResources().getString(R.string.details_no_instructions));
+                    }
+
+                    setNavigationButtons();
 
                     if(!selectedRecipeStep.getVideoURL().isEmpty()) {
 
@@ -252,11 +269,13 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                         if(mMediaUri != null && !mMediaUri.equals(mediaUri)) {
                             // Reset player to 0 if we are choosing a new recipe step.
                             mPlayerPosition = 0;
+                            mPlayWhenReady = true;
                         }
                         mMediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
 
                         Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
                         playerView.setVisibility(View.VISIBLE);
+                        mPlayWhenReady = true;
                         initializePlayer(mMediaUri);
 
                         if(onResume) {
@@ -264,11 +283,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                                 playerView.onResume();
                             }
                         }
-                            //TODO: Check network connectivity
                     } else {
-                        //TODO: Should we release player here?
-                        //TODO: Add image to testing JSON to test image loading here
-
                         resetPlayer();
                         playerView.setVisibility(View.GONE);
                         Log.v(LOG_TAG, "Vid: No valid URI for this recipe step.");
@@ -276,6 +291,20 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                 }
             }
         });
+    }
+
+    private void setNavigationButtons() {
+        if(recipeStep.getStepNumber() == 0) {
+            previousStepBtn.setVisibility(View.INVISIBLE);
+        } else {
+            previousStepBtn.setVisibility(View.VISIBLE);
+        }
+
+        if(recipeStep.getStepNumber().equals(totalSteps)) {
+            nextStepBtn.setVisibility(View.INVISIBLE);
+        }else {
+            nextStepBtn.setVisibility(View.VISIBLE);
+        }
     }
 
     private void getTotalSteps() {
@@ -287,16 +316,15 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    /////// [ Media Player Related Methods ] ///////
 
-    //TODO: Figure out how to inject EXO Player. Blerghhhhh. .¬__.¬
+
+    /////// [ Media Player Related Methods ] ///////
     /**
      * Initialize ExoPlayer.
      */
     private void initializePlayer(Uri mediaUri) {
         if (mExoPlayer == null) {
             //Create an instance of the ExoPlayer.
-
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
 
@@ -305,33 +333,33 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
             attachPlayerView();
 
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(mPlayWhenReady);
         }
 
         prepareMediaSource(mediaUri);
 
         // Set the ExoPlayer.EventListener to this activity.
-        mExoPlayer.addListener(new Player.EventListener() {
-            @Override
-            public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
-
-            }
-
-            @Override
-            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-            }
-
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
-                Log.v(LOG_TAG, "Vid: Loading changed: " + isLoading);
-            }
-
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                Log.v(LOG_TAG, "Vid: Player State Changed:");
-            }
-        });
+//        mExoPlayer.addListener(new Player.EventListener() {
+//            @Override
+//            public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
+//
+//            }
+//
+//            @Override
+//            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+//
+//            }
+//
+//            @Override
+//            public void onLoadingChanged(boolean isLoading) {
+//                Log.v(LOG_TAG, "Vid: Loading changed: " + isLoading);
+//            }
+//
+//            @Override
+//            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+//                Log.v(LOG_TAG, "Vid: Player State Changed:");
+//            }
+//        });
 
         // Restore the playback position
         boolean hasStartingPos = mPlayerWindow != C.INDEX_UNSET;
@@ -343,14 +371,12 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     private void prepareMediaSource(Uri mediaUri) {
-
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory =
                 new DefaultHttpDataSourceFactory(Util.getUserAgent(getActivity(), this.getString(R.string.app_name)));
 
         // This is the MediaSource representing the media to be played.
         videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(mediaUri);
-
     }
 
     /**
