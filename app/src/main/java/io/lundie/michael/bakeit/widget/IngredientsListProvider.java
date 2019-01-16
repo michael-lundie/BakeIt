@@ -35,7 +35,6 @@ public class IngredientsListProvider implements RemoteViewsFactory {
 
     @Override
     public void onDataSetChanged() {
-        //mDataList = ingredientsWidgetUtility.getIngredients();
     }
 
     @Override
@@ -77,7 +76,6 @@ public class IngredientsListProvider implements RemoteViewsFactory {
      */
     @Override
     public RemoteViews getViewAt(int position) {
-        Log.v(LOG_TAG, "TEST: Populating view");
         final RemoteViews remoteView = new RemoteViews(
                 context.getPackageName(), R.layout.ingredients_widget_list_item);
 

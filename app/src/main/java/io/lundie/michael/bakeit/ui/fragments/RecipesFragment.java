@@ -41,14 +41,11 @@ public class RecipesFragment extends Fragment {
     private static boolean IS_LANDSCAPE_TABLET;
     private static boolean IS_TABLET;
 
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
 
-    RecipesViewModel recipesViewModel;
-
-    RecipesViewAdapter mAdapter;
-
-    ArrayList<Recipe> mRecipeList;
+    private RecipesViewModel recipesViewModel;
+    private RecipesViewAdapter mAdapter;
+    private ArrayList<Recipe> mRecipeList;
 
     @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
     @BindView(R.id.recipes_list_empty_tv) TextView mEmptyView;
@@ -154,13 +151,6 @@ public class RecipesFragment extends Fragment {
             public void onChanged(@Nullable ArrayList<Recipe> recipes) {
 
                 if((recipes != null) && (!recipes.isEmpty())) {
-
-                    for (int i=0; i < recipes.size(); i++) {
-                        Log.i(LOG_TAG, "Recipe steps Number: " + recipes.get(i).getId());
-
-                        Log.v(LOG_TAG, "Ingredients: " + recipes.get(i).getRecipeSteps().get(i).getDescription());
-                    }
-
                     // It feels tempting to set our adapter directly from the variable returned by the
                     // observer onChanged method. If we do this we will loose our fragment state,
                     // since our viewmodel is not retained after replacing this fragment with
@@ -170,9 +160,7 @@ public class RecipesFragment extends Fragment {
                     // run into some issues with this.
                     mRecipeList = recipes;
                     mAdapter.setRecipes(mRecipeList);
-
                 }
-                Log.v(LOG_TAG, "on changed called" + mRecipeList);
             }
         });
     }

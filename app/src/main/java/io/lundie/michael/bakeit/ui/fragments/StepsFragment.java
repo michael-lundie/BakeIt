@@ -35,18 +35,14 @@ public class StepsFragment extends Fragment {
     private static final String LOG_TAG = StepsFragment.class.getName();
 
     @Inject ViewModelProvider.Factory recipesViewModelFactory;
-
     @Inject DataUtils dataUtils;
 
-    RecipesViewModel recipesViewModel;
-
-    StepsViewAdapter mAdapter;
-
-    ArrayList<RecipeStep> mRecipeSteps;
-
-    ArrayList<Boolean> setStepBackgroundBooleans;
-
     private static boolean IS_LANDSCAPE_TABLET;
+
+    private RecipesViewModel recipesViewModel;
+    private StepsViewAdapter mAdapter;
+    private ArrayList<RecipeStep> mRecipeSteps;
+    private ArrayList<Boolean> setStepBackgroundBooleans;
 
     @BindView(R.id.steps_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
 
@@ -89,7 +85,6 @@ public class StepsFragment extends Fragment {
 
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
         mRecyclerView.setAdapter(mAdapter);
-
 
         // Return the layout for this fragment
         return listFragmentView;

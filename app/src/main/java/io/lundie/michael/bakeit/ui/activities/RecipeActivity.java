@@ -43,38 +43,27 @@ import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 import io.lundie.michael.bakeit.widget.IngredientsWidgetProvider;
 
-public class RecipeActivity extends AppCompatActivity
-        implements HasSupportFragmentInjector {
+public class RecipeActivity extends AppCompatActivity implements HasSupportFragmentInjector {
 
-    public static final String LOG_TAG = RecipeActivity.class.getName();
+    private static final String LOG_TAG = RecipeActivity.class.getName();
 
-    @Inject
-    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
-
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
-
+    @Inject DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
     @Inject AppConstants appConstants;
-
     @Inject DataUtils dataUtils;
-
     @Inject Prefs prefs;
 
     @BindView(R.id.send_to_widget_fab) FloatingActionButton sendToWidgetFab;
 
-    static boolean IS_LANDSCAPE_TABLET;
+    private static boolean IS_LANDSCAPE_TABLET;
+    private static int PRIMARY_FRAME = R.id.primary_content_frame;
+    private static int SECONDARY_FRAME = R.id.secondary_content_frame;
 
-    static int PRIMARY_FRAME = R.id.primary_content_frame;
-    static int SECONDARY_FRAME = R.id.secondary_content_frame;
-
-    String requestedFragment;
-
-    RecipesViewModel recipesViewModel;
+    private RecipesViewModel recipesViewModel;
 
     // Holding local references to our variables so we can access them easily.
     RecipePagerFragment pagerFragment;
     StepDetailsFragment detailsFragment;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +76,6 @@ public class RecipeActivity extends AppCompatActivity
         //Configure Dagger 2 injection
         this.configureDagger();
         this.configureViewModel();
-
 
         if(savedInstanceState == null) {
             setUpFragments();
@@ -104,6 +92,9 @@ public class RecipeActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * Simple method for initializing fragments
+     */
     private void setUpFragments() {
         if(IS_LANDSCAPE_TABLET) {
             addFragment(SECONDARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
@@ -113,6 +104,9 @@ public class RecipeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Method for restoring fragments from various states.
+     */
     private void restoreFragments() {
         if(IS_LANDSCAPE_TABLET) {
             boolean fragmentPopped = getSupportFragmentManager().popBackStackImmediate (AppConstants.FRAGTAG_STEPS, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -127,8 +121,10 @@ public class RecipeActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Method used for broadcasting new data to an associated widget
+     */
     private void broadcastRecipeToWidget() {
-
         Recipe recipe = recipesViewModel.getSelectedRecipe().getValue();
         if(recipe != null) {
             Intent widgetIntent = new Intent(getApplicationContext(), IngredientsWidgetProvider.class);
@@ -144,13 +140,17 @@ public class RecipeActivity extends AppCompatActivity
 
         recipesViewModel.fragmentRequestObserver().removeObservers(this);
         Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
+
         if(detailsFragment != null) {
             getSupportFragmentManager().putFragment(outState, AppConstants.FRAGTAG_DETAILS, detailsFragment);
         }
     }
 
+    /**
+     * Method for setting up our pager fragment
+     * @return returns RecipePagerFragment
+     */
     private RecipePagerFragment setUpStepsFragment() {
-
         pagerFragment = (RecipePagerFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_STEPS);
         if(pagerFragment == null) {
             pagerFragment = new RecipePagerFragment();
@@ -160,6 +160,10 @@ public class RecipeActivity extends AppCompatActivity
         return pagerFragment;
     }
 
+    /**
+     * Method for setting up our step details fragment
+     * @return returns StepDetailsFragment
+     */
     private StepDetailsFragment setUpDetailsFragment() {
         detailsFragment = (StepDetailsFragment) getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
         if(detailsFragment == null) {
@@ -176,7 +180,6 @@ public class RecipeActivity extends AppCompatActivity
         if(detailsFragment != null) {
             isVisible = detailsFragment.isVisible();
         }
-
         if(!IS_LANDSCAPE_TABLET && isVisible) {
             replaceFragment(PRIMARY_FRAME, setUpStepsFragment(), AppConstants.FRAGTAG_STEPS);
         } else {
@@ -208,7 +211,6 @@ public class RecipeActivity extends AppCompatActivity
         recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String fragmentRequestTag) {
-                requestedFragment = fragmentRequestTag;
                 if(fragmentRequestTag != null && fragmentRequestTag.equals(AppConstants.FRAGTAG_DETAILS)) {
                     replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
                 }

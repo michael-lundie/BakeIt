@@ -29,7 +29,7 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         void onItemClick(RecipeStep recipeStepItem);
     }
 
-    ArrayList<RecipeStep> mRecipeSteps;
+    private ArrayList<RecipeStep> mRecipeSteps;
 
     private final StepsViewAdapter.OnItemClickListener mListener;
 
@@ -65,7 +65,6 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         } else {
             holder.bind(mRecipeSteps.get(position), Boolean.FALSE, mListener);
         }
-
     }
 
     @Override

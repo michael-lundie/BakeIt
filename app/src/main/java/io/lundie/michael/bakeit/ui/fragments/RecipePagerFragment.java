@@ -2,6 +2,7 @@ package io.lundie.michael.bakeit.ui.fragments;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -25,9 +26,7 @@ public class RecipePagerFragment extends Fragment {
     RecipePagerAdapter recipePagerAdapter;
 
 
-    public RecipePagerFragment() {
-        // Required empty public constructor
-    }
+    public RecipePagerFragment() {/* Required empty public constructor */ }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +34,7 @@ public class RecipePagerFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View pagerView = inflater.inflate(R.layout.fragment_recipe_pagers, container, false);
         ButterKnife.bind(this, pagerView);

@@ -55,6 +55,8 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private static final String LOG_TAG = StepDetailsFragment.class.getName();
 
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
+
     private final static boolean ON_RESUME_TRUE = true;
     private final static boolean ON_RESUME_FALSE = false;
 
@@ -64,22 +66,16 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     private int mPlayerWindow;
     private boolean mPlayWhenReady;
 
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
-
-    RecipesViewModel recipesViewModel;
-
-    RecipeStep recipeStep;
-
-    int totalSteps;
-    Uri mMediaUri;
+    private RecipesViewModel recipesViewModel;
+    private RecipeStep recipeStep;
+    private int totalSteps;
+    private Uri mMediaUri;
 
     @BindView(R.id.detail_test_tv) TextView testTextTv;
     @BindView(R.id.detail_instruction_tv) TextView instructionsTv;
     @BindView(R.id.previous_step_btn) Button previousStepBtn;
     @BindView(R.id.next_step_btn) Button nextStepBtn;
     @BindView(R.id.video_pv) PlayerView playerView;
-
 
     public StepDetailsFragment() { /* Required empty public constructor for fragment classes. */ }
 
@@ -161,9 +157,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                 releasePlayer();
             }
         }
-
-        //TODO: Resolve any onPause stuff here.
-        Log.v(LOG_TAG, "TEST: ON PAUSE CALLED");
     }
 
     @Override
@@ -183,9 +176,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             if (playerView != null) {
                 playerView.onPause();
             }
-            releasePlayer();
-        }
-        releasePlayer();
+        } releasePlayer();
     }
 
     @Override
@@ -316,9 +307,8 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         }
     }
 
-
-
     /////// [ Media Player Related Methods ] ///////
+
     /**
      * Initialize ExoPlayer.
      */
@@ -338,36 +328,12 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
         prepareMediaSource(mediaUri);
 
-        // Set the ExoPlayer.EventListener to this activity.
-//        mExoPlayer.addListener(new Player.EventListener() {
-//            @Override
-//            public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
-//
-//            }
-//
-//            @Override
-//            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-//
-//            }
-//
-//            @Override
-//            public void onLoadingChanged(boolean isLoading) {
-//                Log.v(LOG_TAG, "Vid: Loading changed: " + isLoading);
-//            }
-//
-//            @Override
-//            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-//                Log.v(LOG_TAG, "Vid: Player State Changed:");
-//            }
-//        });
-
         // Restore the playback position
         boolean hasStartingPos = mPlayerWindow != C.INDEX_UNSET;
         if (hasStartingPos) {
             mExoPlayer.seekTo(mPlayerWindow, mPlayerPosition);
         }
         mExoPlayer.prepare(videoSource,!hasStartingPos, false);
-
     }
 
     private void prepareMediaSource(Uri mediaUri) {

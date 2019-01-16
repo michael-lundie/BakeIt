@@ -73,7 +73,6 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
         notifyDataSetChanged();
     }
 
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final View mView;
