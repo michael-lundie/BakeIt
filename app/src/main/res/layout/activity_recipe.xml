@@ -16,6 +16,6 @@ android:layout_height="match_parent">
         android:layout_margin="@dimen/default_padding"
         android:clickable="true"
         android:src="@drawable/ic_note_add_white"
-        android:layout_gravity="bottom|start" />
+        android:layout_gravity="bottom|end" />
 
 </android.support.design.widget.CoordinatorLayout>

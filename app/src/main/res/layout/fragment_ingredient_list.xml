@@ -9,6 +9,7 @@
     android:background="@color/colorPrimaryLight"
     android:layout_marginLeft="@dimen/default_padding"
     android:layout_marginRight="@dimen/default_padding"
+    android:layout_marginBottom="50dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context="io.lundie.michael.bakeit.ui.fragments.IngredientsFragment"
     tools:listitem="@layout/ingredient_list_item" />
