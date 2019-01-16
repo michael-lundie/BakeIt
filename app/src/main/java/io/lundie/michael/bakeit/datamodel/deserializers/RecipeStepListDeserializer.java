@@ -37,7 +37,7 @@ public class RecipeStepListDeserializer implements JsonDeserializer<RecipeStep> 
                 jsonObject.get("videoURL").getAsString(),
                 jsonObject.get("thumbnailURL").getAsString()
         );
-
+        stepNumber = stepNumber;
         stepNumber++;
 
         return recipeStep;
