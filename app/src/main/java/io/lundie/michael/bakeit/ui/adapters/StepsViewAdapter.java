@@ -29,6 +29,10 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         void onItemClick(RecipeStep recipeStepItem);
     }
 
+    public interface OnLiveDataChange {
+        void onLiveDataChange(int recipeStepId);
+    }
+
     ArrayList<RecipeStep> mRecipeSteps;
 
     private final StepsViewAdapter.OnItemClickListener mListener;

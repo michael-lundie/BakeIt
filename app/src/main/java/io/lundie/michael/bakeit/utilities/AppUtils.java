@@ -19,9 +19,9 @@ public class AppUtils {
     public AppUtils(Application application) {
         this.context = application;
     }
+
     /**
      * Checks to make sure the smart phone has access to the internet.
-     * @param context the application context
      * @return boolean
      */
     public boolean checkNetworkAccess() {
@@ -35,24 +35,5 @@ public class AppUtils {
         }
         //Connectivity manager is null so returning false.
         return false;
-    }
-
-    /**
-     * A simple utility method to parse/format a given date to the users locale
-     * @param dateString The original date string (from JSON Query)
-     * @param errorMessage An error message to display if the date cannot be parsed.
-     * @return Formatted date.
-     */
-    public static String formatDate(DateFormat dateFormat, String dateString, String errorMessage, String logTag) {
-
-        String parsedDate = errorMessage;
-        try {
-            Date date = dateFormat.parse(dateString);
-            parsedDate = DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
-        } catch (ParseException e) {
-            Log.e(logTag, "Error parsing date.", e);
-            e.printStackTrace();
-        }
-        return parsedDate;
     }
 }

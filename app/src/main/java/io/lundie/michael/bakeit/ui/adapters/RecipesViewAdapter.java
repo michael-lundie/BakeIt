@@ -26,6 +26,7 @@ import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 import io.lundie.michael.bakeit.utilities.CacheManager;
+import io.lundie.michael.bakeit.utilities.VideoThumbnailUtility;
 
 public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.ViewHolder> {
 
@@ -92,10 +93,6 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
             mContext = view.getContext();
             this.mView = view;
             ButterKnife.bind(this, view);
-            if(nothumbnail == null) {
-                nothumbnail = new BitmapDrawable(BitmapFactory.decodeResource
-                        (mContext.getResources(), R.drawable.no_thumbnail));
-            }
         }
 
         void bind(final Recipe recipe, final OnItemClickListener listener) {
@@ -127,9 +124,8 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
 
                             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
                             imageAndViewPair.put(thumbnailIV.getId(), url);
-                            loadImageInThread(mContext, imageAndViewPair, mView, recipe.getId(), thumbnailProgressBar);
-
-                            //new VideoThumbnail(url, thumbnailIV, thumbnailProgressBar);
+                            new VideoThumbnailUtility().fetchVideoThumbnail(mContext, imageAndViewPair,
+                                    mView, recipe.getId(), thumbnailProgressBar);
                             break;
                         } else {
                             //TODO: Placeholder image here
@@ -144,38 +140,6 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
                     listener.onItemClick(recipe);
                 }
             });
-        }
-    }
-    private void loadImageInThread(Context context, final Map<Integer, String> bindings, final View view, final int id, final ProgressBar progressBar) {
-        for (final Map.Entry<Integer, String> binding :
-                bindings.entrySet()) {
-            new DownloadImageAsync(new DownloadImageAsync.Listener() {
-
-                ImageView thumbnailView = view.findViewById(binding.getKey());
-
-                @Override
-                public void onImageDownloaded(final Bitmap bitmap) {
-                    // Create a new bitmap drawable
-                    BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
-                    //Add the drawable to our cache instance
-                    CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
-                    //Set the drawable to our fragment thumbnail view
-                    thumbnailView.setImageDrawable(bitmapDrawable);
-                    //Show our thumbnail
-                    thumbnailView.setVisibility(View.VISIBLE);
-                    //Hide the UI progress spinner
-                    progressBar.setVisibility(View.INVISIBLE);
-                }
-                @Override
-                public void onImageDownloadError() {
-                    // Let's hide the thumbnail view since no image was returned.
-                    CacheManager.getInstance().addBitmapToMemoryCache(id, nothumbnail);
-                    thumbnailView.setImageDrawable(nothumbnail);
-                    progressBar.setVisibility(View.INVISIBLE);
-                    Log.e(LOG_TAG, "Failed to download image for "
-                            + binding.getKey());
-                }
-            }).execute(binding.getValue());
         }
     }
 }
