@@ -173,6 +173,7 @@ public class RecipeActivity extends AppCompatActivity
         } else {
             finish();
         }
+
     }
 
     @Override

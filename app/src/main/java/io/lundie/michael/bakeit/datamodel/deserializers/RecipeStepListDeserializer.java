@@ -13,6 +13,11 @@ import java.lang.reflect.Type;
 
 import io.lundie.michael.bakeit.datamodel.models.RecipeStep;
 
+/**
+ * Simple deserializer class allowing for a custom id field to be added to the {@link RecipeStep}
+ * POJO model during GSON deserialization.
+ *
+ */
 public class RecipeStepListDeserializer implements JsonDeserializer<RecipeStep> {
 
     // Note we cannot use a static variable here or else we will have trouble.

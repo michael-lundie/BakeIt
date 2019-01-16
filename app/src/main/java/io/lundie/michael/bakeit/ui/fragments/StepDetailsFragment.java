@@ -118,11 +118,13 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             //TODO: Assign some variable constants
             recipeStep = savedInstanceState.getParcelable("mRecipeStep");
             // Get previously saved player position
+            if (mMediaUri != null) {
+
+                mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
+            }
             mPlayerPosition = savedInstanceState.getLong("mPlayerPosition");
             mPlayerWindow = savedInstanceState.getInt("mPlayerWindow");
             mPlayWhenReady = savedInstanceState.getBoolean("mPlayWhenReady");
-            mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
-
         } else {
             mPlayerPosition = C.TIME_UNSET;
             mPlayerWindow = C.INDEX_UNSET;
@@ -200,12 +202,12 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
             Log.i(LOG_TAG,  "TEST >>>>>>>>>>>> Saving position:");
 
-
-        outState.putString("mMediaUri", mMediaUri.toString());
+        if(mMediaUri != null) {
+            outState.putString("mMediaUri", mMediaUri.toString());
+        }
         outState.putLong("mPlayerPosition", mPlayerPosition);
         outState.putInt("mPlayerWindow", mPlayerWindow);
         outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
-
 
         if (recipeStep != null){
             outState.putParcelable("mRecipeStep", recipeStep);

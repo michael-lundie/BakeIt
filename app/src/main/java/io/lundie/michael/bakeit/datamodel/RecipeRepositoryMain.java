@@ -31,6 +31,8 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 
 /**
  * Recipe Repository class responsible for the fetching and management of recipe data.
+ * Please note that PRODUCTION and FAKE build flavors contain alternative repo
+ * implementations.
  */
 public class RecipeRepositoryMain implements RecipeRepository {
 
@@ -41,8 +43,8 @@ public class RecipeRepositoryMain implements RecipeRepository {
     private SimpleLruCache lruCache;
     private boolean networkFetchInProgress = false;
     private AppUtils appUtils;
-
     private static MutableLiveData<ArrayList<Recipe>> recipesLiveData;
+
     ArrayList<Recipe> recipes = null;
 
     @Inject
@@ -79,14 +81,22 @@ public class RecipeRepositoryMain implements RecipeRepository {
         return recipesLiveData;
     }
 
+    /**
+     * Void method which initiates a network fetch in a separate thread and posts the data
+     * which is retrieved by our view model.
+     */
     private void fetchRecipesOverNetwork() {
         networkFetchInProgress = true;
         RunnableInterface recipesFetchRunInterface = new RunnableInterface() {
             @Override
             public void onRunCompletion() {
+                //AppExecutor has finished. (This does not assume success.)
                 networkFetchInProgress = false;
+
+                //Post the value to our live data variable
                 recipesLiveData.postValue(recipes);
 
+                //If we retrieved the data successfully, send to cache.
                 if(recipes != null) {
                     sendToCache(recipes);
                 }
@@ -156,15 +166,30 @@ public class RecipeRepositoryMain implements RecipeRepository {
         return recipes;
     }
 
+    /**
+     * Method which passes a stream reader and custom type token to our injected gson instance to
+     * be parsed.
+     * @param reader Input stream reader.
+     * @return successfully parsed ArrayList<Recipe>
+     */
     private ArrayList<Recipe> convertStreamWithGson(Reader reader) {
+        // Using custom TypeToken for deserialization.
         Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();
         return gson.fromJson(reader, recipeListType);
     }
 
+    /**
+     * Method sending ArrayList data to a simple cache instance.
+     * @param recipes
+     */
     private void sendToCache(ArrayList<Recipe> recipes) {
         lruCache.getCacheData().put("recipe", recipes);
     }
 
+    /**
+     * A method which attempts to retrieve any previously cached data.
+     * @return true if successful / otherwise false
+     */
     private boolean attemptCacheRetrieval() {
         Log.i(LOG_TAG, "TEST: Retrieving from cache");
         ArrayList<Recipe> recipeList = (ArrayList<Recipe>) lruCache.getCacheData().get("recipe");
