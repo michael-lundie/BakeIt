@@ -4,15 +4,27 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="250dp">
-        <ImageView
-            android:id="@+id/recipe_thumbnail"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
-            android:contentDescription="@string/CD_image_recipe_thumb"
-            android:src="@drawable/no_thumbnail"
-            android:padding="2dp"
-            android:scaleType="centerCrop" />
+            android:layout_weight="2">
+            <ImageView
+                android:id="@+id/list_recipe_thumbnail_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/CD_image_recipe_thumb"
+                android:src="@drawable/no_thumbnail"
+                android:padding="2dp"
+                android:scaleType="centerCrop" />
+            <ProgressBar
+                android:id="@+id/list_progress_bar"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="@dimen/background_progressbar_dimen"
+                android:layout_height="@dimen/background_progressbar_dimen"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:visibility="visible" />
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="vertical"

@@ -20,8 +20,6 @@ public class Recipe implements Parcelable {
 
     };
 
-    //TODO: Add some kind of manual count here 
-
     @SerializedName("id")
     @Expose
     private Integer id;
@@ -41,6 +39,7 @@ public class Recipe implements Parcelable {
     @SerializedName("servings")
     @Expose
     private Integer servings;
+
     @SerializedName("image")
     @Expose
     private String image;
@@ -118,5 +117,4 @@ public class Recipe implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
 }

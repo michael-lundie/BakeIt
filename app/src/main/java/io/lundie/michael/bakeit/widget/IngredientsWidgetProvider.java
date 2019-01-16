@@ -14,15 +14,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import butterknife.ButterKnife;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Ingredient;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.services.IngredientsWidgetService;
-import io.lundie.michael.bakeit.ui.fragments.RecipesFragment;
 import io.lundie.michael.bakeit.ui.fragments.utils.DataUtils;
 import io.lundie.michael.bakeit.utilities.Prefs;
-import io.lundie.michael.bakeit.widget.utils.IngredientsWidgetUtility;
 
 /**
  * Implementation of App Widget functionality.

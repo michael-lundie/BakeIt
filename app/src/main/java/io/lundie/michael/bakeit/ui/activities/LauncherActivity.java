@@ -25,24 +25,16 @@ import io.lundie.michael.bakeit.ui.fragments.StepsFragment;
 import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
-public class LauncherActivity extends AppCompatActivity
-        implements HasSupportFragmentInjector {
+public class LauncherActivity extends AppCompatActivity implements HasSupportFragmentInjector {
 
-    public static final String LOG_TAG = LauncherActivity.class.getName();
+    private static final String LOG_TAG = LauncherActivity.class.getName();
 
-    @Inject
-    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
-
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
-
+    @Inject DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
     @Inject AppConstants appConstants;
 
-    static boolean IS_LANDSCAPE_TABLET;
-
-    RecipesViewModel recipesViewModel;
-
-    RecipesFragment recipesFragment;
+    private static boolean IS_LANDSCAPE_TABLET;
+    private RecipesViewModel recipesViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +82,6 @@ public class LauncherActivity extends AppCompatActivity
         // Get our view model provider.
         recipesViewModel = ViewModelProviders.of(this,
                 recipesViewModelFactory).get(RecipesViewModel.class);
-//
-//        if (recipesFragment == null) {
-//            recipesFragment = new RecipesFragment();
-//        }
 
         recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
             @Override

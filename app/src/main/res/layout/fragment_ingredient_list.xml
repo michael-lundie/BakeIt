@@ -6,8 +6,10 @@
     android:name="io.lundie.michael.bakeit.ui.fragments.ItemFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:background="@color/colorPrimaryLight"
+    android:layout_marginLeft="@dimen/default_padding"
+    android:layout_marginRight="@dimen/default_padding"
+    android:layout_marginBottom="50dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context="io.lundie.michael.bakeit.ui.fragments.IngredientsFragment"
     tools:listitem="@layout/ingredient_list_item" />

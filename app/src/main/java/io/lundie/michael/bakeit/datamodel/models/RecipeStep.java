@@ -124,5 +124,4 @@ public class RecipeStep implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
 }

@@ -6,10 +6,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +16,11 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import dagger.android.support.AndroidSupportInjection;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.datamodel.models.Ingredient;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.ui.adapters.IngredientsViewAdapter;
-import io.lundie.michael.bakeit.ui.fragments.dummy.DummyContent;
-import io.lundie.michael.bakeit.ui.fragments.dummy.DummyContent.DummyItem;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 
 /**
@@ -33,24 +28,20 @@ import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
  */
 public class IngredientsFragment extends Fragment {
 
-    @Inject
-    ViewModelProvider.Factory recipesViewModelFactory;
+    @Inject ViewModelProvider.Factory recipesViewModelFactory;
+    @Inject IngredientsViewAdapter mAdapter;
 
-    RecipesViewModel recipesViewModel;
+    private RecipesViewModel recipesViewModel;
 
-    ArrayList<Ingredient> mIngredientsList;
+    private ArrayList<Ingredient> mIngredientsList;
 
-    @Inject
-    IngredientsViewAdapter mAdapter;
-
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public IngredientsFragment() {
-    }
+    public IngredientsFragment() { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

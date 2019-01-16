@@ -2,6 +2,7 @@ package injection.module;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,6 +13,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
 import io.lundie.michael.bakeit.datamodel.RecipeRepositoryMain;
+import io.lundie.michael.bakeit.utilities.AppUtils;
 import io.lundie.michael.bakeit.utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
@@ -26,11 +28,18 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 @Module(includes = {ViewModelModule.class,
                     AppConstantsModule.class,
                     SharedPreferencesModule.class,
-                    DataUtilsModule.class,
-                    ExoPlayerModule.class})
+                    DataUtilsModule.class})
 public class AppModule {
 
     private static final String LOG_TAG = AppModule.class.getSimpleName();
+
+    // Utils Injection
+    @Provides
+    @Singleton
+    AppUtils provideUtils(Application application) {
+        Log.i(LOG_TAG, "TEST: UTILS INJECTION");
+        return new AppUtils(application);
+    }
 
     // Provides AssetProvider
     @Provides
@@ -57,8 +66,9 @@ public class AppModule {
     // Repo Injection
     @Provides
     @Singleton
-    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache) {
-        return new RecipeRepositoryMain(gson, assetProvider, lruCache);
+    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider,
+                                             SimpleLruCache lruCache, AppUtils appUtils) {
+        return new RecipeRepositoryMain(gson, assetProvider, lruCache, appUtils);
     }
 
     // LRU Cache instance injection

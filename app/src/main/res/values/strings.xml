@@ -3,10 +3,12 @@
     <!-- UI -->
     <string name="CD_image_recipe_thumb">Image of recipe.</string>
     <string name="recipes_text_serving_size">Servings:</string>
+    <string name="no_connection_text">Please check your network connection and try again.</string>
 
     <!-- Details Fragment -->
     <string name="details_prev_btn">Previous Step</string>
     <string name="details_next_btn">Next Step</string>
+    <string name="details_no_instructions">Sorry, no instructions available for this step.</string>
 
     <!-- Contents Fragments -->
 

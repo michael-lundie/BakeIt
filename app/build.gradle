@@ -52,10 +52,12 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:1.1.1"
     implementation "android.arch.lifecycle:viewmodel:1.1.1"
 
+    //Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
     // Dagger 2
     implementation 'com.google.dagger:dagger-android:2.16'
     implementation 'com.google.dagger:dagger-android-support:2.16'
-    implementation 'com.android.support:support-v4:28.0.0'
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.16'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
 

@@ -32,7 +32,6 @@ public class RecipePagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-
         if(position == 0){
             return AppConstants.FRAGMENT_STEPS_TITLE;
         } else {

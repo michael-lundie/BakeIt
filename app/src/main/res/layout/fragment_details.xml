@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,25 +7,65 @@
     android:layout_height="match_parent"
     android:background="@android:color/holo_blue_bright"
     tools:context=".ui.fragments.StepsFragment">
-
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/video_pv"
+    <android.support.v4.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="200dp">
-    </com.google.android.exoplayer2.ui.PlayerView>
+        android:layout_height="match_parent"
+        android:layout_marginBottom="50dp"
+        >
+        <android.support.constraint.ConstraintLayout
+            android:paddingTop="@dimen/half_padding"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/detail_test_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/video_pv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="16:9"
+            android:layout_margin="@dimen/half_padding">
+        </com.google.android.exoplayer2.ui.PlayerView>
 
+
+        <TextView
+            android:id="@+id/detail_test_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorIcons"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="8dp"
+            android:padding="@dimen/half_padding"
+            android:layout_marginLeft="@dimen/half_padding"
+            android:layout_marginRight="@dimen/half_padding"
+            app:layout_constraintTop_toBottomOf="@+id/video_pv"
+            tools:text="test" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="@dimen/half_padding"
+            android:layout_marginRight="@dimen/half_padding"
+            app:layout_constraintTop_toBottomOf="@+id/detail_test_tv"
+            android:background="@color/colorAccent"/>
+        <TextView
+            android:id="@+id/detail_instruction_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorIcons"
+            android:layout_marginTop="8dp"
+            android:padding="@dimen/half_padding"
+            android:layout_marginLeft="@dimen/half_padding"
+            android:layout_marginRight="@dimen/half_padding"
+            app:layout_constraintTop_toBottomOf="@+id/detail_test_tv"/>
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v4.widget.NestedScrollView>
 
     <Button
         android:id="@+id/previous_step_btn"
         android:text="@string/details_prev_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent" />

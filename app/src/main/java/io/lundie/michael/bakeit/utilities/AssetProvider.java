@@ -8,6 +8,9 @@ import java.io.InputStream;
 
 import javax.inject.Inject;
 
+/**
+ * Asset Provider classed used for testing. Allows access to backing.json files.
+ */
 public class AssetProvider {
 
     private Application applicationContext;
@@ -32,5 +35,4 @@ public class AssetProvider {
         }
         return jsonData;
     }
-
 }

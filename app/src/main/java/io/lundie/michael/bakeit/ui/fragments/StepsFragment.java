@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 
@@ -34,17 +35,16 @@ public class StepsFragment extends Fragment {
     private static final String LOG_TAG = StepsFragment.class.getName();
 
     @Inject ViewModelProvider.Factory recipesViewModelFactory;
-
     @Inject DataUtils dataUtils;
 
-    RecipesViewModel recipesViewModel;
+    private static boolean IS_LANDSCAPE_TABLET;
 
-    StepsViewAdapter mAdapter;
+    private RecipesViewModel recipesViewModel;
+    private StepsViewAdapter mAdapter;
+    private ArrayList<RecipeStep> mRecipeSteps;
+    private ArrayList<Boolean> setStepBackgroundBooleans;
 
-    ArrayList<RecipeStep> mRecipeSteps;
-
-    @BindView(R.id.steps_list_rv)
-    RecyclerViewWithSetEmpty mRecyclerView;
+    @BindView(R.id.steps_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
 
     public StepsFragment() { /* Required empty public constructor for fragment classes. */ }
 
@@ -56,6 +56,8 @@ public class StepsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        IS_LANDSCAPE_TABLET = getResources().getBoolean(R.bool.isLandscapeTablet);
 
         // Inflate the layout for this fragment
         View listFragmentView =  inflater.inflate(R.layout.fragment_steps, container, false);
@@ -71,8 +73,8 @@ public class StepsFragment extends Fragment {
             }
         }
 
-
-        mAdapter = new StepsViewAdapter(mRecipeSteps, new StepsViewAdapter.OnItemClickListener() {
+        mAdapter = new StepsViewAdapter(mRecipeSteps, setStepBackgroundBooleans,
+                new StepsViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecipeStep recipeStepItem) {
                 Log.i(LOG_TAG, "TEST: View Adapter click received.");
@@ -84,7 +86,6 @@ public class StepsFragment extends Fragment {
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
         mRecyclerView.setAdapter(mAdapter);
 
-
         // Return the layout for this fragment
         return listFragmentView;
     }
@@ -93,7 +94,6 @@ public class StepsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.configureDagger();
-
         if(recipesViewModel == null) {
             this.configureViewModel();
         }
@@ -127,27 +127,55 @@ public class StepsFragment extends Fragment {
 
         recipesViewModel.getRecipes().removeObservers(this);
 
-        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
-            @Override
-            public void onChanged(@Nullable Recipe selectedRecipe) {
+        Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
+        if(selectedRecipe != null) {
 
-                if(selectedRecipe != null) {
+            String title = getString(R.string.app_name);
+            getActivity().setTitle(title  + " " + selectedRecipe.getName());
+            ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
 
-                    if(!selectedRecipe.getRecipeSteps().isEmpty()) {
-//                        for (int i=0; i < selectedRecipe.getRecipeSteps().size(); i++) {
-//                            Log.i(LOG_TAG, "Recipe Step No: " + selectedRecipe.getRecipeSteps().get(i).getStepNumber());
-//                        }
-                        // Holding a local reference to recipe steps so that Android can handle
-                        // our fragment state without having to re-configure our viewmodel on
-                        // resume. (See further notes in RecipesFragment.java)
-                        //mRecipeSteps = (ArrayList<RecipeStep>) selectedRecipe.getRecipeSteps();
-                        mAdapter.setStepsList((ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps());
-                        //TODO: Which is better? Using notify data changed on local variable or just
-                        // reconfiguring the viewmodel every time?
+            if(!recipeSteps.isEmpty()) {
+
+                RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();
+
+                if(!IS_LANDSCAPE_TABLET) {
+                    mAdapter.setStepsList(recipeSteps);
+                } else {
+                    int currentStep = 0;
+                    if(recipeStep != null) {
+                        currentStep = recipeStep.getStepNumber();
                     }
+
+                    setStepBackgroundBooleans = new ArrayList<Boolean>();
+
+                    while(setStepBackgroundBooleans.size() < recipeSteps.size())
+                        setStepBackgroundBooleans.add(Boolean.FALSE);
+
+                    setStepBackgroundBooleans.set(currentStep, Boolean.TRUE);
+
+                    mAdapter.setStepsList(recipeSteps, setStepBackgroundBooleans);
                 }
             }
-        });
+        }
+
+        if(IS_LANDSCAPE_TABLET) {
+            recipesViewModel.getSelectedRecipeStep().observe(this, new Observer<RecipeStep>() {
+                @Override
+                public void onChanged(@Nullable RecipeStep recipeStep) {
+                    if (recipeStep != null) {
+                        int currentRecipeStep = recipeStep.getStepNumber();
+                        for(int i = 0; i < setStepBackgroundBooleans.size(); i++) {
+                            if(i == currentRecipeStep) {
+                                setStepBackgroundBooleans.set(currentRecipeStep, Boolean.TRUE);
+                            } else {
+                                setStepBackgroundBooleans.set(i, Boolean.FALSE);
+                            }
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
     }
 
     /**
