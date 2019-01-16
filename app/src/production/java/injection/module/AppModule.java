@@ -66,8 +66,9 @@ public class AppModule {
     // Repo Injection
     @Provides
     @Singleton
-    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache) {
-        return new RecipeRepositoryMain(gson, assetProvider, lruCache);
+    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider,
+                                             SimpleLruCache lruCache, AppUtils appUtils) {
+        return new RecipeRepositoryMain(gson, assetProvider, lruCache, appUtils);
     }
 
     // LRU Cache instance injection

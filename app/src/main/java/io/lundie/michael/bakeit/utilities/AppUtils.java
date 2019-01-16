@@ -31,7 +31,7 @@ public class AppUtils {
         if (connMgr != null) {
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             // Returns true or false depending on connectivity status.
-            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+            return networkInfo != null && networkInfo.isConnected();
         }
         //Connectivity manager is null so returning false.
         return false;

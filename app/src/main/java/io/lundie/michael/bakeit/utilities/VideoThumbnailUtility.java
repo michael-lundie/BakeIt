@@ -68,7 +68,6 @@ public class VideoThumbnailUtility {
                 @Override
                 public void run() {
                     try {
-                        progressBar.setVisibility(View.VISIBLE);
                         bitmap = retrieveVideoFrameFromVideo(binding.getValue());
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();

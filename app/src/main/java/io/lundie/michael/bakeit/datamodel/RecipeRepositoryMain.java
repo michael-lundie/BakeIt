@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.utilities.AppExecutors;
+import io.lundie.michael.bakeit.utilities.AppUtils;
 import io.lundie.michael.bakeit.utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.CallbackRunnable;
 import io.lundie.michael.bakeit.utilities.RunnableInterface;
@@ -38,15 +39,19 @@ public class RecipeRepositoryMain implements RecipeRepository {
     private final Gson gson;
     private final AssetProvider assetProvider;
     private SimpleLruCache lruCache;
+    private boolean networkFetchInProgress = false;
+    private AppUtils appUtils;
 
     private static MutableLiveData<ArrayList<Recipe>> recipesLiveData;
     ArrayList<Recipe> recipes = null;
 
     @Inject
-    public RecipeRepositoryMain(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache) {
+    public RecipeRepositoryMain(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache,
+                                AppUtils appUtils) {
         this.gson = gson;
         this.assetProvider = assetProvider;
         this.lruCache = lruCache;
+        this.appUtils = appUtils;
     }
 
     /**
@@ -63,20 +68,28 @@ public class RecipeRepositoryMain implements RecipeRepository {
         }
 
         if(recipesLiveData.getValue() == null || recipesLiveData.getValue().isEmpty()) {
-            if(!attemptCacheRetrieval()) {
-                fetchRecipesOverNetwork();
+            if(!attemptCacheRetrieval() && appUtils.checkNetworkAccess()) {
+                // Boolean value set to prevent multiple network/repo requests being made by
+                // our observer objects;
+                if(!networkFetchInProgress) {
+                    fetchRecipesOverNetwork();
+                }
             }
         }
         return recipesLiveData;
     }
 
     private void fetchRecipesOverNetwork() {
+        networkFetchInProgress = true;
         RunnableInterface recipesFetchRunInterface = new RunnableInterface() {
             @Override
             public void onRunCompletion() {
-                // Note that we should never have a null value returned here.
+                networkFetchInProgress = false;
                 recipesLiveData.postValue(recipes);
-                sendToCache(recipes);
+
+                if(recipes != null) {
+                    sendToCache(recipes);
+                }
             }
         };
 
@@ -97,6 +110,7 @@ public class RecipeRepositoryMain implements RecipeRepository {
                             throw new IOException("No response received.");
                         }
                     } catch(Exception e) {
+                        networkFetchInProgress = false;
                         Log.e("Log error", "Problem with Requested URL", e);
                     }
                 }
@@ -130,7 +144,7 @@ public class RecipeRepositoryMain implements RecipeRepository {
                 Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Problem retrieving the Google Books JSON results.", e);
+            Log.e(LOG_TAG, "Problem retrieving JSON results.", e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();

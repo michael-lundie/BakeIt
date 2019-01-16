@@ -46,7 +46,6 @@ public class StepsFragment extends Fragment {
 
     ArrayList<Boolean> setStepBackgroundBooleans;
 
-
     private static boolean IS_LANDSCAPE_TABLET;
 
     @BindView(R.id.steps_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
@@ -136,65 +135,33 @@ public class StepsFragment extends Fragment {
         recipesViewModel.getRecipes().removeObservers(this);
 
 
-//        Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
-//        if(selectedRecipe != null) {
-//            ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
-//            if(!recipeSteps.isEmpty()) {
-//
-//                RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();
-//
-//                if(!IS_LANDSCAPE_TABLET) {
-//                    mAdapter.setStepsList(recipeSteps);
-//                } else {
-//
-//                    if(recipeStep != null) {
-//                        currentStep = recipeStep.getStepNumber();
-//                    }
-//
-//                    setStepBackgroundBooleans = new ArrayList<Boolean>();
-//
-//                    while(setStepBackgroundBooleans.size() < recipeSteps.size())
-//                        setStepBackgroundBooleans.add(Boolean.FALSE);
-//
-//                    setStepBackgroundBooleans.set(currentStep, Boolean.TRUE);
-//
-//                    mAdapter.setStepsList(recipeSteps, setStepBackgroundBooleans);
-//                }
-//            }
-//        }
+        Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
+        if(selectedRecipe != null) {
+            ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
+            if(!recipeSteps.isEmpty()) {
 
-        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
-            @Override
-            public void onChanged(@Nullable Recipe selectedRecipe) {
+                RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();
 
-                if(selectedRecipe != null) {
-                    ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
-                    if(!recipeSteps.isEmpty()) {
-
-                        RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();
-
-                        if(!IS_LANDSCAPE_TABLET) {
-                            mAdapter.setStepsList(recipeSteps);
-                        } else {
-                            int currentStep = 0;
-
-                            if(recipeStep != null) {
-                                currentStep = recipeStep.getStepNumber();
-                            }
-
-                            setStepBackgroundBooleans = new ArrayList<Boolean>();
-
-                            while(setStepBackgroundBooleans.size() < recipeSteps.size())
-                                setStepBackgroundBooleans.add(Boolean.FALSE);
-
-                            setStepBackgroundBooleans.set(currentStep, Boolean.TRUE);
-
-                            mAdapter.setStepsList(recipeSteps, setStepBackgroundBooleans);
-                        }
+                if(!IS_LANDSCAPE_TABLET) {
+                    mAdapter.setStepsList(recipeSteps);
+                } else {
+                    int currentStep = 0;
+                    if(recipeStep != null) {
+                        currentStep = recipeStep.getStepNumber();
                     }
+
+                    setStepBackgroundBooleans = new ArrayList<Boolean>();
+
+                    while(setStepBackgroundBooleans.size() < recipeSteps.size())
+                        setStepBackgroundBooleans.add(Boolean.FALSE);
+
+                    setStepBackgroundBooleans.set(currentStep, Boolean.TRUE);
+
+                    mAdapter.setStepsList(recipeSteps, setStepBackgroundBooleans);
                 }
             }
-        });
+        }
+
         if(IS_LANDSCAPE_TABLET) {
             recipesViewModel.getSelectedRecipeStep().observe(this, new Observer<RecipeStep>() {
                 @Override

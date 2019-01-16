@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -50,6 +51,7 @@ public class RecipesFragment extends Fragment {
     ArrayList<Recipe> mRecipeList;
 
     @BindView(R.id.recipes_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
+    @BindView(R.id.recipes_list_empty_tv) TextView mEmptyView;
 
     public RecipesFragment() { /* Required empty public constructor for fragment classes. */ }
 
@@ -98,6 +100,7 @@ public class RecipesFragment extends Fragment {
             }
         });
 
+        mRecyclerView.setEmptyView(mEmptyView);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getListSpanCount()));
         mRecyclerView.setAdapter(mAdapter);
 
