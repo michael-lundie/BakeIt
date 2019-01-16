@@ -41,6 +41,7 @@ public class Recipe implements Parcelable {
     @SerializedName("servings")
     @Expose
     private Integer servings;
+
     @SerializedName("image")
     @Expose
     private String image;

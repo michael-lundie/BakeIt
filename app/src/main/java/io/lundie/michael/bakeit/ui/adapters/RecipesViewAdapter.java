@@ -1,10 +1,9 @@
 package io.lundie.michael.bakeit.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,11 +13,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,9 +38,6 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
     ArrayList<Recipe> mRecipes;
 
     private final OnItemClickListener mListener;
-    private BitmapDrawable nothumbnail;
-
-
 
     public RecipesViewAdapter(ArrayList<Recipe> recipes, OnItemClickListener listener) {
         this.mRecipes = recipes;
@@ -103,32 +99,45 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
             servingsTv.setText(servings);
 
             String url = recipe.getImage();
+
             if(url != null && !url.isEmpty() && url.length() > 10) {
-                Glide.with(mContext).asBitmap()
-                        .load(url)
-                        .into(thumbnailIV);
+                // If we have a valid image url let's fetch the thumbnail using picasso.
+                Picasso.get().load(url)
+                        .into(thumbnailIV, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                thumbnailProgressBar.setVisibility(View.INVISIBLE);
+                            }
+                            @Override
+                            public void onError(Exception e) {
+                                thumbnailProgressBar.setVisibility(View.INVISIBLE);
+                                thumbnailIV.setBackgroundColor(ContextCompat.getColor(
+                                        mContext, R.color.colorPrimaryLight));
+                            }
+                        });
             } else {
-                Log.v(LOG_TAG, "TEST: Attempting to restore cache: " + recipe.getId());
                 BitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(recipe.getId());
 
                 if(image != null) {
                     thumbnailProgressBar.setVisibility(View.INVISIBLE);
                     thumbnailIV.setImageDrawable(image);
                 } else {
-                    thumbnailProgressBar.setVisibility(View.VISIBLE);
-
+                    // Let's generate an image from the video.
+                    // NOTE: This is a little beyond me currently, but I gave it my best shot!
+                    // It is slow and laggy. I will improve this ASAP.
                     ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>) recipe.getRecipeSteps();
+
+                    //Reverse iterate through our recipeSteps to get the very last video url
                     for (int i = recipeSteps.size() - 1; i >= 0; i--) {
                         url = recipeSteps.get(i).getVideoURL();
-                        if(url != null && url.length() > 10) {
 
+                        if(url != null && url.length() > 10) {
+                            // We are good to go. We will generate a thumbnail from the video stream.
                             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
                             imageAndViewPair.put(thumbnailIV.getId(), url);
                             new VideoThumbnailUtility().fetchVideoThumbnail(mContext, imageAndViewPair,
                                     mView, recipe.getId(), thumbnailProgressBar);
                             break;
-                        } else {
-                            //TODO: Placeholder image here
                         }
                     }
                 }

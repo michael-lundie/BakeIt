@@ -20,7 +20,7 @@ import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 
 /**
  * Recipe Repository TEST Fake class responsible for the fetching and management of recipe data.
- * This repository fake does not implement the LRU cache
+ * This repository fake does not implement the LRU cache or access via network.
  */
 public class RecipeRepositoryFake implements RecipeRepository {
 
@@ -55,9 +55,5 @@ public class RecipeRepositoryFake implements RecipeRepository {
         Type recipeListType = new TypeToken<ArrayList<Recipe>>(){}.getType();
         ArrayList<Recipe> recipeList = gson.fromJson(reader, recipeListType);
         recipes.setValue(recipeList);
-    }
-
-    private void getHardCodedRecipes() {
-        //TODO; If time - code some hard coded recipes.
     }
 }

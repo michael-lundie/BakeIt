@@ -101,7 +101,7 @@
       }
     ],
     "servings": 8,
-    "image": ""
+    "image": "https://tal.tokyo/mike/nutella_pie.png"
   },
   {
     "id": 2,
@@ -231,7 +231,7 @@
       }
     ],
     "servings": 8,
-    "image": ""
+    "image": "https://tal.tokyo/mike/brownies.png"
   },
   {
     "id": 3,
@@ -382,7 +382,7 @@
       }
     ],
     "servings": 8,
-    "image": ""
+    "image": "https://tal.tokyo/mike/yellow_cake.png"
   },
   {
     "id": 4,
@@ -528,6 +528,6 @@
       }
     ],
     "servings": 8,
-    "image": ""
+    "image": "https://tal.tokyo/mike/cheese_cake.png"
   }
 ]

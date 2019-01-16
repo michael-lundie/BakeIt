@@ -77,7 +77,6 @@ public class StepsFragment extends Fragment {
             }
         }
 
-
         mAdapter = new StepsViewAdapter(mRecipeSteps, setStepBackgroundBooleans,
                 new StepsViewAdapter.OnItemClickListener() {
             @Override
@@ -100,7 +99,6 @@ public class StepsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.configureDagger();
-
         if(recipesViewModel == null) {
             this.configureViewModel();
         }
@@ -134,10 +132,13 @@ public class StepsFragment extends Fragment {
 
         recipesViewModel.getRecipes().removeObservers(this);
 
-
         Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
         if(selectedRecipe != null) {
+
+            String title = getString(R.string.app_name);
+            getActivity().setTitle(title  + " " + selectedRecipe.getName());
             ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
+
             if(!recipeSteps.isEmpty()) {
 
                 RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();

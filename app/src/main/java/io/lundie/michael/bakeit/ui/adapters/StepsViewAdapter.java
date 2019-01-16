@@ -95,11 +95,9 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
 
     @Override public int getItemViewType(int position) { return position; }
 
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final View mView;
-
 
         // Bind views using butterknife
         @BindView(R.id.list_step_top_spacer) View recipeStepTopSpacer;
