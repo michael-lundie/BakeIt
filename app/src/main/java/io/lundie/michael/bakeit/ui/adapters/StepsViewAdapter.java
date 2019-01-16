@@ -29,19 +29,22 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         void onItemClick(RecipeStep recipeStepItem);
     }
 
-    public interface OnLiveDataChange {
-        void onLiveDataChange(int recipeStepId);
-    }
-
     ArrayList<RecipeStep> mRecipeSteps;
 
     private final StepsViewAdapter.OnItemClickListener mListener;
 
-
+    private ArrayList<Boolean> mSetStepBackgroundBooleans;
 
     public StepsViewAdapter(ArrayList<RecipeStep> recipeSteps, StepsViewAdapter.OnItemClickListener listener) {
         this.mRecipeSteps = recipeSteps;
         this.mListener = listener;
+    }
+
+    public StepsViewAdapter(ArrayList<RecipeStep> recipeSteps, ArrayList<Boolean> setStepBackgroundBooleans,
+                            StepsViewAdapter.OnItemClickListener listener) {
+        this.mRecipeSteps = recipeSteps;
+        this.mListener = listener;
+        this.mSetStepBackgroundBooleans = setStepBackgroundBooleans;
     }
 
     @NonNull
@@ -56,7 +59,13 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
     @Override
     public void onBindViewHolder(@NonNull StepsViewAdapter.ViewHolder holder, int position) {
         Log.i(LOG_TAG, "Binding to position: " + position);
-        holder.bind(mRecipeSteps.get(position), mListener);
+        if(mSetStepBackgroundBooleans != null) {
+            holder.bind(mRecipeSteps.get(position),
+                    mSetStepBackgroundBooleans.get(position), mListener);
+        } else {
+            holder.bind(mRecipeSteps.get(position), Boolean.FALSE, mListener);
+        }
+
     }
 
     @Override
@@ -74,12 +83,23 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
         notifyDataSetChanged();
     }
 
+    /**
+     * Method override for setStepsList
+     */
+    public void setStepsList(ArrayList<RecipeStep> steps,
+                             ArrayList<Boolean> setStepBackgroundBooleans) {
+        mSetStepBackgroundBooleans = setStepBackgroundBooleans;
+        mRecipeSteps = steps;
+        notifyDataSetChanged();
+    }
+
     @Override public int getItemViewType(int position) { return position; }
 
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
         final View mView;
+
 
         // Bind views using butterknife
         @BindView(R.id.list_step_top_spacer) View recipeStepTopSpacer;
@@ -94,14 +114,22 @@ public class StepsViewAdapter extends RecyclerView.Adapter<StepsViewAdapter.View
             ButterKnife.bind(this, view);
         }
 
-        void bind(final RecipeStep recipeStep, final StepsViewAdapter.OnItemClickListener listener) {
+        void bind(final RecipeStep recipeStep, final Boolean setBackground
+                ,final StepsViewAdapter.OnItemClickListener listener) {
 
             if(recipeStep.getStepNumber() == 0) {
                 recipeStepTopSpacer.setVisibility(View.INVISIBLE);
             }
 
+            if(setBackground == Boolean.TRUE) {
+                mView.setBackgroundColor(mView.getContext().getResources().getColor(R.color.colorAccent));
+            } else {
+                mView.setBackgroundColor(mView.getContext().getResources().getColor(R.color.colorPrimaryLight));
+            }
+
             recipeStepShortDescription.setText(recipeStep.getShortDescription());
-            Integer stepNumber = recipeStep.getStepNumber() + 1;
+            Integer stepNumber = recipeStep.getStepNumber() +1;
+            Log.v(LOG_TAG, "Step number: " + stepNumber);
             recipeStepNumber.setText(stepNumber.toString());
 
             if(recipeStep.getVideoURL().isEmpty()) {
