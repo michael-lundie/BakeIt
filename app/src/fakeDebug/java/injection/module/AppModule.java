@@ -13,9 +13,8 @@ import dagger.Module;
 import dagger.Provides;
 import datamodel.RecipeRepositoryFake;
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
-import io.lundie.michael.bakeit.datamodel.RecipeRepositoryMain;
 import io.lundie.michael.bakeit.utilities.AppUtils;
-import io.lundie.michael.bakeit.utilities.AssetProvider;
+import utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 

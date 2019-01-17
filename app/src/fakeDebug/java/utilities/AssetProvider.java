@@ -1,4 +1,4 @@
-package io.lundie.michael.bakeit.utilities;
+package utilities;
 
 import android.app.Application;
 import android.renderscript.ScriptGroup;
@@ -10,6 +10,8 @@ import javax.inject.Inject;
 
 /**
  * Asset Provider classed used for testing. Allows access to backing.json files.
+ * #### IMPORTANT ####
+ * Please note that the static JSON file is only used for testing.
  */
 public class AssetProvider {
 

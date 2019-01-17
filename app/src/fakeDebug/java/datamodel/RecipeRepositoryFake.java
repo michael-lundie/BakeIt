@@ -1,7 +1,6 @@
 package datamodel;
 
 import android.arch.lifecycle.MutableLiveData;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -15,8 +14,7 @@ import javax.inject.Inject;
 
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
 import io.lundie.michael.bakeit.datamodel.models.Recipe;
-import io.lundie.michael.bakeit.utilities.AssetProvider;
-import io.lundie.michael.bakeit.utilities.SimpleLruCache;
+import utilities.AssetProvider;
 
 /**
  * Recipe Repository TEST Fake class responsible for the fetching and management of recipe data.
