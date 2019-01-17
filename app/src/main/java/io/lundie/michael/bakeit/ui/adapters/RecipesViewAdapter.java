@@ -82,6 +82,7 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
         @BindView(R.id.list_recipe_servings) TextView servingsTv;
         @BindView(R.id.list_recipe_thumbnail_iv) ImageView thumbnailIV;
         @BindView(R.id.list_progress_bar) ProgressBar thumbnailProgressBar;
+        @BindView(R.id.list_recipe_placeholder) ImageView placeholderIconView;
 
         ViewHolder(View view) {
             super(view);
@@ -135,7 +136,7 @@ public class RecipesViewAdapter extends RecyclerView.Adapter<RecipesViewAdapter.
                             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
                             imageAndViewPair.put(thumbnailIV.getId(), url);
                             new VideoThumbnailUtility().fetchVideoThumbnail(mContext, imageAndViewPair,
-                                    mView, recipe.getId(), thumbnailProgressBar);
+                                    mView, recipe.getId(), thumbnailProgressBar, placeholderIconView);
                             break;
                         }
                     }

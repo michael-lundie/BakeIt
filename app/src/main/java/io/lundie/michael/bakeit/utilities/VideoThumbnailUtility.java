@@ -27,30 +27,26 @@ public class VideoThumbnailUtility {
     private static final String LOG_TAG = VideoThumbnailUtility.class.getSimpleName();
 
     private Bitmap bitmap;
+    private BitmapDrawable bitmapDrawable = null;
 
     public void fetchVideoThumbnail(Context context, final Map<Integer, String> bindings, final View view,
-                                     final int id, final ProgressBar progressBar) {
+                                     final int id, final ProgressBar progressBar,
+                                    final ImageView placeholder) {
         for (final Map.Entry<Integer, String> binding : bindings.entrySet()) {
             AppExecutors.getInstance().networkIO().execute(new CallbackRunnable(new RunnableInterface() {
                 @Override
                 public void onRunCompletion() {
                     ImageView thumbnailView = view.findViewById(binding.getKey());
-                    BitmapDrawable bitmapDrawable;
+
                     if(bitmap != null) {
                         // Create a new bitmap drawable
                         bitmapDrawable = new BitmapDrawable(
                                 context.getResources(), bitmap);
-                    } else {
-                        ContextCompat.getDrawable(context, R.drawable.no_thumbnail);
-                        bitmapDrawable = new BitmapDrawable(
-                                context.getResources(), BitmapFactory.decodeResource(
-                                context.getResources(), R.drawable.no_thumbnail));
                     }
                         
                     if(bitmapDrawable != null) {
-                        //Add the drawable to our cache instance
                         CacheManager.getInstance().addBitmapToMemoryCache(
-                                id, bitmapDrawable); 
+                                id, bitmapDrawable);
                     }
 
                     //Update our view on the main thread.
@@ -60,6 +56,8 @@ public class VideoThumbnailUtility {
                             if (bitmapDrawable != null) {
                                 //Set the drawable to our fragment thumbnail view
                                 thumbnailView.setImageDrawable(bitmapDrawable); 
+                            } else {
+                                placeholder.setVisibility(View.VISIBLE);
                             }
                             //Show our thumbnail
                             thumbnailView.setVisibility(View.VISIBLE);
