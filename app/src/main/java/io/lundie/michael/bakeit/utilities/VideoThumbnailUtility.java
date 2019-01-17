@@ -46,17 +46,21 @@ public class VideoThumbnailUtility {
                                 context.getResources(), BitmapFactory.decodeResource(
                                 context.getResources(), R.drawable.no_thumbnail));
                     }
-
-                    //Add the drawable to our cache instance
-                    CacheManager.getInstance().addBitmapToMemoryCache(
-                            id, bitmapDrawable);
+                        
+                    if(bitmapDrawable != null) {
+                        //Add the drawable to our cache instance
+                        CacheManager.getInstance().addBitmapToMemoryCache(
+                                id, bitmapDrawable); 
+                    }
 
                     //Update our view on the main thread.
                     AppExecutors.getInstance().mainThread().execute(new Runnable() {
                         @Override
                         public void run() {
-                            //Set the drawable to our fragment thumbnail view
-                            thumbnailView.setImageDrawable(bitmapDrawable);
+                            if (bitmapDrawable != null) {
+                                //Set the drawable to our fragment thumbnail view
+                                thumbnailView.setImageDrawable(bitmapDrawable); 
+                            }
                             //Show our thumbnail
                             thumbnailView.setVisibility(View.VISIBLE);
                             //Hide the UI progress spinner
