@@ -91,11 +91,14 @@ public class VideoThumbnailUtility {
 
             mediaMetadataRetriever.setDataSource(videoPath, new HashMap<String, String>());
 
-            bitmap = ThumbnailUtils.extractThumbnail(
-                    mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST),
-                    300,
-                    300,
-                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            bitmap = mediaMetadataRetriever.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST);
+            if (bitmap != null) {
+                bitmap = ThumbnailUtils.extractThumbnail(
+                        bitmap,
+                        300,
+                        300,
+                        ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            }
         }
         catch (Exception e)
         {
