@@ -14,7 +14,6 @@ import dagger.Provides;
 import io.lundie.michael.bakeit.datamodel.RecipeRepository;
 import io.lundie.michael.bakeit.datamodel.RecipeRepositoryMain;
 import io.lundie.michael.bakeit.utilities.AppUtils;
-import io.lundie.michael.bakeit.utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
 
@@ -41,13 +40,6 @@ public class AppModule {
         return new AppUtils(application);
     }
 
-    // Provides AssetProvider
-    @Provides
-    @Singleton
-    AssetProvider localFileProvider(Application application) {
-        return new AssetProvider(application);
-    }
-
     // Preference Injection
     @Provides
     @Singleton
@@ -66,9 +58,8 @@ public class AppModule {
     // Repo Injection
     @Provides
     @Singleton
-    RecipeRepository provideRecipeRepository(Gson gson, AssetProvider assetProvider,
-                                             SimpleLruCache lruCache, AppUtils appUtils) {
-        return new RecipeRepositoryMain(gson, assetProvider, lruCache, appUtils);
+    RecipeRepository provideRecipeRepository(Gson gson, SimpleLruCache lruCache, AppUtils appUtils) {
+        return new RecipeRepositoryMain(gson, lruCache, appUtils);
     }
 
     // LRU Cache instance injection

@@ -112,7 +112,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             recipeStep = savedInstanceState.getParcelable("mRecipeStep");
             // Get previously saved player position
             if (mMediaUri != null) {
-
                 mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
             }
             mPlayerStartPosition = savedInstanceState.getLong("mPlayerStartPosition");

@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -24,7 +23,6 @@ import io.lundie.michael.bakeit.datamodel.models.Recipe;
 import io.lundie.michael.bakeit.utilities.AppConstants;
 import io.lundie.michael.bakeit.utilities.AppExecutors;
 import io.lundie.michael.bakeit.utilities.AppUtils;
-import io.lundie.michael.bakeit.utilities.AssetProvider;
 import io.lundie.michael.bakeit.utilities.CallbackRunnable;
 import io.lundie.michael.bakeit.utilities.RunnableInterface;
 import io.lundie.michael.bakeit.utilities.SimpleLruCache;
@@ -39,7 +37,6 @@ public class RecipeRepositoryMain implements RecipeRepository {
     private static final String LOG_TAG = RecipeRepositoryMain.class.getSimpleName();
 
     private final Gson gson;
-    private final AssetProvider assetProvider;
     private SimpleLruCache lruCache;
     private boolean networkFetchInProgress = false;
     private AppUtils appUtils;
@@ -48,10 +45,8 @@ public class RecipeRepositoryMain implements RecipeRepository {
     ArrayList<Recipe> recipes = null;
 
     @Inject
-    public RecipeRepositoryMain(Gson gson, AssetProvider assetProvider, SimpleLruCache lruCache,
-                                AppUtils appUtils) {
+    public RecipeRepositoryMain(Gson gson, SimpleLruCache lruCache, AppUtils appUtils) {
         this.gson = gson;
-        this.assetProvider = assetProvider;
         this.lruCache = lruCache;
         this.appUtils = appUtils;
     }

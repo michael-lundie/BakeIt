@@ -111,7 +111,6 @@ public class StepsFragment extends Fragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mRecipeSteps != null){
-            Log.i(LOG_TAG, "TEST: Saving parcelable recipe steps.");
             outState.putParcelableArrayList("mRecipeSteps", mRecipeSteps);
         }
         if(mCurrentRecipe != null){

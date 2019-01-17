@@ -38,7 +38,6 @@ public class AppModule {
     @Provides
     @Singleton
     AppUtils provideUtils(Application application) {
-        Log.i(LOG_TAG, "TEST: UTILS INJECTION");
         return new AppUtils(application);
     }
 
