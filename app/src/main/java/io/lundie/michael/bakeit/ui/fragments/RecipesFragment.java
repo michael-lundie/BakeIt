@@ -74,7 +74,6 @@ public class RecipesFragment extends Fragment {
         if (mRecipeList == null || mRecipeList.isEmpty()){
             if (savedInstanceState != null) {
                 mRecipeList = savedInstanceState.getParcelableArrayList("mRecipeList");
-                Log.i(LOG_TAG, "TEST: Retrieving parcelable data for recipe steps: " + mRecipeList);
             } else {
                 mRecipeList = new ArrayList<>();
             }
@@ -119,7 +118,6 @@ public class RecipesFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Log.v(LOG_TAG, "TEST: Recipes, ON RESUME called");
         super.onResume();
         if(recipesViewModel == null) {
             this.configureViewModel();

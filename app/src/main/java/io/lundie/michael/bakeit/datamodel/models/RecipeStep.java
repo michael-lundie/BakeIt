@@ -38,7 +38,6 @@ public class RecipeStep implements Parcelable {
 
         @SuppressWarnings({ "unchecked" })
         public RecipeStep createFromParcel(Parcel in) {
-            Log.i(LOG_TAG, "TEST: Creating RECIPE STEP <FROM> parcel.");
             return new RecipeStep(in); }
 
         public RecipeStep[] newArray(int size) { return (new RecipeStep[size]); }
@@ -51,6 +50,7 @@ public class RecipeStep implements Parcelable {
         this.description = in.readString();
         this.videoURL = in.readString();
         this.thumbnailURL = in.readString();
+        this.stepNumber = in.readInt();
     }
 
     public RecipeStep(Integer stepNumber,
@@ -119,6 +119,7 @@ public class RecipeStep implements Parcelable {
         dest.writeString(description);
         dest.writeString(videoURL);
         dest.writeString(thumbnailURL);
+        dest.writeInt(stepNumber);
     }
 
     public int describeContents() {

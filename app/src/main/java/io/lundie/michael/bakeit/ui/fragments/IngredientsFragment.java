@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,6 +65,14 @@ public class IngredientsFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mIngredientsList != null){
+            outState.putParcelableArrayList("mIngredientsList", mIngredientsList);
+        }
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.configureDagger();
@@ -97,10 +106,12 @@ public class IngredientsFragment extends Fragment {
     }
 
     private void configureData() {
-        Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
-        if(selectedRecipe != null) {
-            mIngredientsList = (ArrayList<Ingredient>) selectedRecipe.getIngredients();
-            mAdapter.setIngredients(mIngredientsList);
+        if(mIngredientsList == null) {
+            Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
+            if(selectedRecipe != null) {
+                mIngredientsList = (ArrayList<Ingredient>) selectedRecipe.getIngredients();
+                mAdapter.setIngredients(mIngredientsList);
+            }
         }
     }
 

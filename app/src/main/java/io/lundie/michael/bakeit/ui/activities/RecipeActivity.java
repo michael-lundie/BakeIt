@@ -43,6 +43,10 @@ import io.lundie.michael.bakeit.utilities.Prefs;
 import io.lundie.michael.bakeit.viewmodel.RecipesViewModel;
 import io.lundie.michael.bakeit.widget.IngredientsWidgetProvider;
 
+/**
+ * Activity class responsible for several child fragments. Note we are using Live Data observers
+ * to drive communication between fragments, so our life cycle is a little different than usual.
+ */
 public class RecipeActivity extends AppCompatActivity implements HasSupportFragmentInjector {
 
     private static final String LOG_TAG = RecipeActivity.class.getName();
@@ -58,8 +62,11 @@ public class RecipeActivity extends AppCompatActivity implements HasSupportFragm
     private static boolean IS_LANDSCAPE_TABLET;
     private static int PRIMARY_FRAME = R.id.primary_content_frame;
     private static int SECONDARY_FRAME = R.id.secondary_content_frame;
+    private static boolean PREVIOUS_SCREEN_STATE;
 
     private RecipesViewModel recipesViewModel;
+    private RecipeStep mCurrentRecipeStep;
+    private Recipe mCurrentRecipe;
 
     // Holding local references to our variables so we can access them easily.
     RecipePagerFragment pagerFragment;
@@ -76,13 +83,35 @@ public class RecipeActivity extends AppCompatActivity implements HasSupportFragm
         //Configure Dagger 2 injection
         this.configureDagger();
         this.configureViewModel();
+        recipesViewModel.getSelectedRecipeStep().removeObservers(this);
 
         if(savedInstanceState == null) {
+            // Initialise fragments
             setUpFragments();
         } else {
+            //We have a saved instance state. Let's deal with this appropriately.
+            // Get the previous rotation state
+            PREVIOUS_SCREEN_STATE = savedInstanceState.getBoolean("mPreviousViewState");
+
+            //Restore our view model
+            mCurrentRecipeStep = savedInstanceState.getParcelable("mRecipeStep");
+            if (mCurrentRecipeStep != null) {
+                recipesViewModel.selectRecipeStep(mCurrentRecipeStep);
+            }
+
+            mCurrentRecipe = savedInstanceState.getParcelable("mRecipe");
+            if (mCurrentRecipe != null) {
+                recipesViewModel.selectRecipeItem(mCurrentRecipe);
+            }
             //Resuming from saved instance / Rotation
             restoreFragments();
         }
+
+        if (!IS_LANDSCAPE_TABLET) {
+            this.configureFragmentObserver();
+        }
+
+        this.configureObservers();
 
         sendToWidgetFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +137,7 @@ public class RecipeActivity extends AppCompatActivity implements HasSupportFragm
      * Method for restoring fragments from various states.
      */
     private void restoreFragments() {
-        if(IS_LANDSCAPE_TABLET) {
+        if(IS_LANDSCAPE_TABLET && PREVIOUS_SCREEN_STATE != IS_LANDSCAPE_TABLET) {
             boolean fragmentPopped = getSupportFragmentManager().popBackStackImmediate (AppConstants.FRAGTAG_STEPS, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             if(!fragmentPopped) {
                 Log.v(LOG_TAG, "Main view restored successfully");
@@ -137,6 +166,16 @@ public class RecipeActivity extends AppCompatActivity implements HasSupportFragm
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putBoolean("mPreviousViewState", IS_LANDSCAPE_TABLET);
+
+        if (mCurrentRecipeStep != null){
+            outState.putParcelable("mRecipeStep", mCurrentRecipeStep);
+
+        }
+        if (mCurrentRecipe != null) {
+            outState.putParcelable("mRecipe", mCurrentRecipe);
+        }
 
         recipesViewModel.fragmentRequestObserver().removeObservers(this);
         Fragment detailsFragment = getSupportFragmentManager().findFragmentByTag(AppConstants.FRAGTAG_DETAILS);
@@ -201,18 +240,33 @@ public class RecipeActivity extends AppCompatActivity implements HasSupportFragm
         // Get our view model provider.
         recipesViewModel = ViewModelProviders.of(this,
                 recipesViewModelFactory).get(RecipesViewModel.class);
-
-        if (!IS_LANDSCAPE_TABLET) {
-            configureObservers();
-        }
     }
 
-    private void configureObservers() {
+    private void configureFragmentObserver() {
         recipesViewModel.fragmentRequestObserver().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String fragmentRequestTag) {
                 if(fragmentRequestTag != null && fragmentRequestTag.equals(AppConstants.FRAGTAG_DETAILS)) {
                     replaceFragment(PRIMARY_FRAME, setUpDetailsFragment(), AppConstants.FRAGTAG_DETAILS);
+                }
+            }
+        });
+    }
+
+    private void configureObservers() {
+        recipesViewModel.getSelectedRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(@Nullable Recipe recipe) {
+                if(recipe != null) {
+                    mCurrentRecipe = recipe;
+                }
+            }
+        });
+        recipesViewModel.getSelectedRecipeStep().observe(this, new Observer<RecipeStep>() {
+            @Override
+            public void onChanged(@Nullable RecipeStep recipeStep) {
+                if(recipeStep != null) {
+                    mCurrentRecipeStep = recipeStep;
                 }
             }
         });

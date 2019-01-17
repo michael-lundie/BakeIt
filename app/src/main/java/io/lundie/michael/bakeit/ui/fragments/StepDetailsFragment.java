@@ -58,7 +58,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     private boolean mPlayWhenReady;
 
     private RecipesViewModel recipesViewModel;
-    private RecipeStep recipeStep;
+    private RecipeStep recipeStep = null;
     private int totalSteps;
     private Uri mMediaUri;
 
@@ -135,7 +135,9 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     public void onStart() {
         super.onStart();
         if (Util.SDK_INT > 23) {
-            initializePlayer();
+            if(mMediaUri != null) {
+                initializePlayer();
+            }
             if (playerView != null) {
                 playerView.onResume();
             }
@@ -163,7 +165,9 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             getTotalSteps();
         }
         if (Util.SDK_INT <= 23 || mExoPlayer == null) {
-            initializePlayer();
+            if(mMediaUri != null) {
+                initializePlayer();
+            }
             if (playerView != null) {
                 playerView.onResume();
             }
@@ -209,12 +213,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         super.onSaveInstanceState(outState);
     }
 
-//    public void exoPlayerOnSave() {
-//        mPlayWhenReady = mExoPlayer.getPlayWhenReady();
-//        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
-//        mPlayerStartPosition = mExoPlayer.getCurrentPosition();
-//    }
-
     /**
      * A simple helper method to configure our view model.
      * Let's return two observables. One, which accesses our data. The other returns network status.
@@ -224,7 +222,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         // Get our view model provider.
         recipesViewModel = ViewModelProviders.of(getActivity(),
                 recipesViewModelFactory).get(RecipesViewModel.class);
-
     }
 
     private void configureObservers(Boolean onResume) {
@@ -235,7 +232,6 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             public void onChanged(@Nullable RecipeStep selectedRecipeStep) {
 
                 if(selectedRecipeStep != null) {
-                    Log.v(LOG_TAG, "Observer Changed: " +selectedRecipeStep.getDescription());
                     recipeStep = selectedRecipeStep;
 
                     String descriptionString = selectedRecipeStep.getShortDescription();
@@ -270,12 +266,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                             mPlayerStartPosition = 0;
                             mPlayWhenReady = true;
                         }
-                        mMediaUri = mediaUri;
 
+                        mMediaUri = mediaUri;
                         Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
                         playerView.setVisibility(View.VISIBLE);
                         mPlayWhenReady = true;
-
                         initializePlayer();
 
                         if(onResume) {
@@ -284,6 +279,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                             }
                         }
                     } else {
+                        // There is no video in this recipe step.
                         resetPlayer();
                         playerView.setVisibility(View.GONE);
                         Log.v(LOG_TAG, "Vid: No valid URI for this recipe step.");
@@ -308,11 +304,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     private void getTotalSteps() {
-
-        Recipe currentRecipe = recipesViewModel.getSelectedRecipe().getValue();
-
-        if(currentRecipe != null) {
-            totalSteps = currentRecipe.getRecipeSteps().size();
+        if (recipesViewModel != null) {
+            Recipe currentRecipe = recipesViewModel.getSelectedRecipe().getValue();
+            if(currentRecipe != null) {
+                totalSteps = currentRecipe.getRecipeSteps().size();
+            }
         }
     }
 

@@ -42,9 +42,13 @@ public class StepsFragment extends Fragment {
     private RecipesViewModel recipesViewModel;
     private StepsViewAdapter mAdapter;
     private ArrayList<RecipeStep> mRecipeSteps;
+    private Recipe mCurrentRecipe;
+
     private ArrayList<Boolean> setStepBackgroundBooleans;
 
     @BindView(R.id.steps_list_rv) RecyclerViewWithSetEmpty mRecyclerView;
+
+    int currentStep = 0;
 
     public StepsFragment() { /* Required empty public constructor for fragment classes. */ }
 
@@ -65,19 +69,17 @@ public class StepsFragment extends Fragment {
         // Time to butter some toast... Bind view references with butterknife library.
         ButterKnife.bind(this, listFragmentView);
 
-        if (mRecipeSteps == null || mRecipeSteps.isEmpty()){
             if (savedInstanceState != null) {
                 mRecipeSteps = savedInstanceState.getParcelableArrayList("mRecipeSteps");
+                mCurrentRecipe = savedInstanceState.getParcelable("mCurrentRecipe");
             } else {
                 mRecipeSteps = new ArrayList<>();
-            }
         }
 
         mAdapter = new StepsViewAdapter(mRecipeSteps, setStepBackgroundBooleans,
                 new StepsViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecipeStep recipeStepItem) {
-                Log.i(LOG_TAG, "TEST: View Adapter click received.");
                 recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
                 recipesViewModel.selectRecipeStep(recipeStepItem);
             }
@@ -101,18 +103,20 @@ public class StepsFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Log.v(LOG_TAG, "TEST: ON RESUME called");
         super.onResume();
         this.configureViewModel();
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
         if (mRecipeSteps != null){
             Log.i(LOG_TAG, "TEST: Saving parcelable recipe steps.");
             outState.putParcelableArrayList("mRecipeSteps", mRecipeSteps);
         }
-        super.onSaveInstanceState(outState);
+        if(mCurrentRecipe != null){
+            outState.putParcelable("mCurrentRecipe", mCurrentRecipe);
+        }
     }
 
     /**
@@ -127,24 +131,28 @@ public class StepsFragment extends Fragment {
 
         recipesViewModel.getRecipes().removeObservers(this);
 
-        Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
-        if(selectedRecipe != null) {
+        if(mCurrentRecipe == null) {
+            mCurrentRecipe = recipesViewModel.getSelectedRecipe().getValue();
+        }
+        if(mCurrentRecipe != null) {
 
             String title = getString(R.string.app_name);
-            getActivity().setTitle(title  + " " + selectedRecipe.getName());
-            ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)selectedRecipe.getRecipeSteps();
+            getActivity().setTitle(title  + " " + mCurrentRecipe.getName());
+            ArrayList<RecipeStep> recipeSteps = (ArrayList<RecipeStep>)mCurrentRecipe.getRecipeSteps();
+
+            Log.v(LOG_TAG, "RESTORE: " +recipeSteps);
 
             if(!recipeSteps.isEmpty()) {
+                mRecipeSteps = recipeSteps;
 
                 RecipeStep recipeStep = recipesViewModel.getSelectedRecipeStep().getValue();
+                Log.v(LOG_TAG, "RESTORE: " +recipeStep);
 
                 if(!IS_LANDSCAPE_TABLET) {
                     mAdapter.setStepsList(recipeSteps);
                 } else {
-                    int currentStep = 0;
-                    if(recipeStep != null) {
-                        currentStep = recipeStep.getStepNumber();
-                    }
+
+                    currentStep = recipeStep.getStepNumber();
 
                     setStepBackgroundBooleans = new ArrayList<Boolean>();
 

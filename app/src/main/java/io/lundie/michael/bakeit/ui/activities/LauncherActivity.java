@@ -92,6 +92,7 @@ public class LauncherActivity extends AppCompatActivity implements HasSupportFra
                     if(IS_LANDSCAPE_TABLET) {
                         recipesViewModel.requestFragment(AppConstants.FRAGTAG_DETAILS);
                     }
+                    Log.v(LOG_TAG, "STARTED ACTIVITY");
                     startActivity(recipeActivityIntent);
                 }
             }

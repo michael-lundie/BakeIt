@@ -22,8 +22,8 @@ public class RecipesViewModel extends ViewModel {
     private RecipeRepository recipeRepository;
 
     // MutableLiveData variables for handling data fetched via repo
-    private static MutableLiveData<ArrayList<Recipe>> recipeListMutableLiveData;
-    private static MutableLiveData<Recipe> selectedRecipeMutableLiveData;
+    private static MutableLiveData<ArrayList<Recipe>> recipeListMutableLiveData = new MutableLiveData<>();
+    private static MutableLiveData<Recipe> selectedRecipeMutableLiveData = new MutableLiveData<>();
     private static MutableLiveData<RecipeStep> selectedRecipeStepLiveData = new MutableLiveData<>();
     private static MutableLiveData<String> fragmentRequestedTag = new MutableLiveData<>();
 
@@ -81,10 +81,17 @@ public class RecipesViewModel extends ViewModel {
      * @param recipeStep the specific recipe STEP object to be loaded into a LiveData object
      */
     public void selectRecipeStep(RecipeStep recipeStep) {
+        Log.v(LOG_TAG, "SAVE : VM : recipe step" + recipeStep);
+        if(selectedRecipeStepLiveData == null) {
+            selectedRecipeStepLiveData = new MutableLiveData<>();
+        }
         selectedRecipeStepLiveData.setValue(recipeStep);
     }
 
     public void selectRecipeStep(int recipeStepID) {
+        if(selectedRecipeStepLiveData == null) {
+            selectedRecipeStepLiveData = new MutableLiveData<>();
+        }
        RecipeStep step = selectedRecipeMutableLiveData.getValue().getRecipeSteps().get(recipeStepID);
         selectedRecipeStepLiveData.setValue(step);
     }
