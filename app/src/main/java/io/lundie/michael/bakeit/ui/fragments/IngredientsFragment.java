@@ -49,13 +49,11 @@ public class IngredientsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ingredient_list, container, false);
 
-        if (mIngredientsList == null || mIngredientsList.isEmpty()){
             if (savedInstanceState != null) {
                 mIngredientsList = savedInstanceState.getParcelableArrayList("mIngredientsList");
             } else {
                 mIngredientsList = new ArrayList<>();
             }
-        }
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -106,13 +104,13 @@ public class IngredientsFragment extends Fragment {
     }
 
     private void configureData() {
-        if(mIngredientsList == null) {
+
             Recipe selectedRecipe = recipesViewModel.getSelectedRecipe().getValue();
             if(selectedRecipe != null) {
                 mIngredientsList = (ArrayList<Ingredient>) selectedRecipe.getIngredients();
                 mAdapter.setIngredients(mIngredientsList);
             }
-        }
+
     }
 
     /**

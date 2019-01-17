@@ -15,7 +15,6 @@ import butterknife.ButterKnife;
 import io.lundie.michael.bakeit.R;
 import io.lundie.michael.bakeit.ui.adapters.RecipePagerAdapter;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */

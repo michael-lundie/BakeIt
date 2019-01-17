@@ -279,6 +279,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                         }
                     } else {
                         // There is no video in this recipe step.
+
                         resetPlayer();
                         playerView.setVisibility(View.GONE);
                         Log.v(LOG_TAG, "Vid: No valid URI for this recipe step.");
@@ -357,6 +358,8 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private void resetPlayer() {
         if (mExoPlayer != null) {
+            mPlayerStartPosition = 0;
+            mPlayWhenReady = true;
             mExoPlayer.stop(true);
         }
     }
