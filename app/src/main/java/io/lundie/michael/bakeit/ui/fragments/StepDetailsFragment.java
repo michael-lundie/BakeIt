@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,23 +20,15 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -62,7 +53,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
     private SimpleExoPlayer mExoPlayer;
     private MediaSource videoSource;
-    private long mPlayerPosition;
+    private long mPlayerStartPosition;
     private int mPlayerWindow;
     private boolean mPlayWhenReady;
 
@@ -124,11 +115,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
 
                 mMediaUri = Uri.parse(savedInstanceState.getString("mMediaUri"));
             }
-            mPlayerPosition = savedInstanceState.getLong("mPlayerPosition");
+            mPlayerStartPosition = savedInstanceState.getLong("mPlayerStartPosition");
             mPlayerWindow = savedInstanceState.getInt("mPlayerWindow");
             mPlayWhenReady = savedInstanceState.getBoolean("mPlayWhenReady");
         } else {
-            mPlayerPosition = C.TIME_UNSET;
+            mPlayerStartPosition = C.TIME_UNSET;
             mPlayerWindow = C.INDEX_UNSET;
             mPlayWhenReady = true;
         }
@@ -143,19 +134,23 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onStart() {
         super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+            if (playerView != null) {
+                playerView.onResume();
+            }
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(mExoPlayer != null) {
-            exoPlayerOnSave();
-            if (Util.SDK_INT <= 23) {
-                if (playerView != null) {
-                    playerView.onPause();
-                }
-                releasePlayer();
+        updateStartPosition();
+        if (Util.SDK_INT <= 23) {
+            if (playerView != null) {
+                playerView.onPause();
             }
+            releasePlayer();
         }
     }
 
@@ -167,6 +162,12 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             this.configureObservers(ON_RESUME_TRUE);
             getTotalSteps();
         }
+        if (Util.SDK_INT <= 23 || mExoPlayer == null) {
+            initializePlayer();
+            if (playerView != null) {
+                playerView.onResume();
+            }
+        }
     }
 
     @Override
@@ -176,7 +177,8 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             if (playerView != null) {
                 playerView.onPause();
             }
-        } releasePlayer();
+            releasePlayer();
+        }
     }
 
     @Override
@@ -197,7 +199,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         if(mMediaUri != null) {
             outState.putString("mMediaUri", mMediaUri.toString());
         }
-        outState.putLong("mPlayerPosition", mPlayerPosition);
+        outState.putLong("mPlayerStartPosition", mPlayerStartPosition);
         outState.putInt("mPlayerWindow", mPlayerWindow);
         outState.putBoolean("mPlayWhenReady", mPlayWhenReady);
 
@@ -207,11 +209,11 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
         super.onSaveInstanceState(outState);
     }
 
-    public void exoPlayerOnSave() {
-        mPlayWhenReady = mExoPlayer.getPlayWhenReady();
-        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
-        mPlayerPosition = mExoPlayer.getCurrentPosition();
-    }
+//    public void exoPlayerOnSave() {
+//        mPlayWhenReady = mExoPlayer.getPlayWhenReady();
+//        mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
+//        mPlayerStartPosition = mExoPlayer.getCurrentPosition();
+//    }
 
     /**
      * A simple helper method to configure our view model.
@@ -258,16 +260,23 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
                         Uri mediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
 
                         if(mMediaUri != null && !mMediaUri.equals(mediaUri)) {
-                            // Reset player to 0 if we are choosing a new recipe step.
-                            mPlayerPosition = 0;
+                            // Release and reset ExoPlayer if we have switched to a new recipe step
+                            // ### NOTE ###
+                            // This is in ontrast to a standard Exo Player setup, since
+                            // we are updating our fragment on the fly with LiveData and not
+                            // following the standard fragment life cycle.
+
+                            releasePlayer();
+                            mPlayerStartPosition = 0;
                             mPlayWhenReady = true;
                         }
-                        mMediaUri = Uri.parse(selectedRecipeStep.getVideoURL());
+                        mMediaUri = mediaUri;
 
                         Log.v(LOG_TAG, "Vid: Loading this URI: " + mMediaUri.toString());
                         playerView.setVisibility(View.VISIBLE);
                         mPlayWhenReady = true;
-                        initializePlayer(mMediaUri);
+
+                        initializePlayer();
 
                         if(onResume) {
                             if (playerView != null) {
@@ -312,7 +321,7 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
     /**
      * Initialize ExoPlayer.
      */
-    private void initializePlayer(Uri mediaUri) {
+    private void initializePlayer() {
         if (mExoPlayer == null) {
             //Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
@@ -324,14 +333,13 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             attachPlayerView();
 
             mExoPlayer.setPlayWhenReady(mPlayWhenReady);
+            prepareMediaSource(mMediaUri);
         }
-
-        prepareMediaSource(mediaUri);
 
         // Restore the playback position
         boolean hasStartingPos = mPlayerWindow != C.INDEX_UNSET;
         if (hasStartingPos) {
-            mExoPlayer.seekTo(mPlayerWindow, mPlayerPosition);
+            mExoPlayer.seekTo(mPlayerWindow, mPlayerStartPosition);
         }
         mExoPlayer.prepare(videoSource,!hasStartingPos, false);
     }
@@ -368,6 +376,15 @@ public class StepDetailsFragment extends Fragment implements View.OnClickListene
             mExoPlayer = null;
         }
     }
+
+    private void updateStartPosition() {
+        if (mExoPlayer != null) {
+            mPlayWhenReady = mExoPlayer.getPlayWhenReady();
+            mPlayerWindow = mExoPlayer.getCurrentWindowIndex();
+            mPlayerStartPosition = Math.max(0, mExoPlayer.getContentPosition());
+        }
+    }
+
 
     /**
      * A simple helper method for setting up dagger with this fragment.
